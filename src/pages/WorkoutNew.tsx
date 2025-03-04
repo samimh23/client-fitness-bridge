@@ -8,9 +8,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Save, Trash2, Dumbbell } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import { Exercise } from '@/lib/types';
+import { ExerciseWithVideo } from '@/lib/exerciseApi';
+import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 
 const WorkoutNew = () => {
   const navigate = useNavigate();
@@ -23,6 +25,9 @@ const WorkoutNew = () => {
   const [exercises, setExercises] = useState<Partial<Exercise>[]>([
     { name: '', sets: 3, reps: 10, day: 1 }
   ]);
+
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
+  const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
 
   const handlePlanChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,6 +63,33 @@ const WorkoutNew = () => {
     
     const updatedExercises = exercises.filter((_, i) => i !== index);
     setExercises(updatedExercises);
+  };
+
+  const openLibrary = (index: number) => {
+    setActiveExerciseIndex(index);
+    setIsLibraryOpen(true);
+  };
+
+  const closeLibrary = () => {
+    setIsLibraryOpen(false);
+    setActiveExerciseIndex(null);
+  };
+
+  const handleSelectExercise = (exerciseWithVideo: ExerciseWithVideo) => {
+    if (activeExerciseIndex === null) return;
+    
+    const updatedExercises = [...exercises];
+    updatedExercises[activeExerciseIndex] = {
+      ...updatedExercises[activeExerciseIndex],
+      name: exerciseWithVideo.name,
+      sets: exerciseWithVideo.sets,
+      reps: exerciseWithVideo.reps,
+      weight: exerciseWithVideo.weight,
+      instructions: exerciseWithVideo.instructions
+    };
+    
+    setExercises(updatedExercises);
+    toast.success(`Added ${exerciseWithVideo.name} to your workout plan!`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -166,25 +198,51 @@ const WorkoutNew = () => {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Exercises</CardTitle>
-                <Button type="button" onClick={addExercise} variant="outline" size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Exercise
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    type="button" 
+                    onClick={() => {
+                      setActiveExerciseIndex(exercises.length);
+                      setIsLibraryOpen(true);
+                      addExercise();
+                    }} 
+                    variant="secondary"
+                    size="sm"
+                  >
+                    <Dumbbell className="mr-2 h-4 w-4" />
+                    Browse Exercise Library
+                  </Button>
+                  <Button type="button" onClick={addExercise} variant="outline" size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Exercise Manually
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {exercises.map((exercise, index) => (
-                  <div key={index}>
+                  <div key={index} className="border rounded-lg p-4 hover:border-primary/50 transition-colors">
                     {index > 0 && <Separator className="my-6" />}
                     <div className="flex justify-between items-center mb-4">
                       <h3 className="text-lg font-medium">Exercise {index + 1}</h3>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeExercise(index)}
-                      >
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => openLibrary(index)}
+                        >
+                          <Dumbbell className="h-4 w-4 mr-1" /> 
+                          Select From Library
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeExercise(index)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
@@ -289,6 +347,12 @@ const WorkoutNew = () => {
           </form>
         </div>
       </div>
+      
+      <ExerciseLibraryModal 
+        isOpen={isLibraryOpen}
+        onClose={closeLibrary}
+        onSelectExercise={handleSelectExercise}
+      />
     </PageTransition>
   );
 };
