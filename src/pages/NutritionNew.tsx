@@ -2,15 +2,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Save } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import { Food, Meal } from '@/lib/types';
+import PlanDetailsForm from '@/components/nutrition/PlanDetailsForm';
+import NutritionSummary from '@/components/nutrition/NutritionSummary';
+import MealForm from '@/components/nutrition/MealForm';
 
 const NutritionNew = () => {
   const navigate = useNavigate();
@@ -217,73 +215,19 @@ const NutritionNew = () => {
         
         <div className="max-w-4xl mx-auto">
           <form onSubmit={handleSubmit}>
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Plan Details</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Plan Name <span className="text-red-500">*</span></Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="e.g., Weight Loss Meal Plan"
-                      value={planData.name}
-                      onChange={handlePlanChange}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      placeholder="Describe the goals and focus of this nutrition plan"
-                      rows={3}
-                      value={planData.description}
-                      onChange={handlePlanChange}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="duration">Duration (weeks)</Label>
-                    <Input
-                      id="duration"
-                      name="duration"
-                      type="number"
-                      min={1}
-                      max={52}
-                      value={planData.duration}
-                      onChange={handlePlanChange}
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <PlanDetailsForm
+              name={planData.name}
+              description={planData.description}
+              duration={planData.duration}
+              onChange={handlePlanChange}
+            />
             
-            <div className="mb-8 p-4 bg-primary/5 rounded-lg">
-              <h3 className="text-lg font-medium mb-3">Nutrition Summary</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <div className="text-sm text-gray-500">Calories</div>
-                  <div className="text-xl font-bold">{totalCalories}</div>
-                </div>
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <div className="text-sm text-gray-500">Protein</div>
-                  <div className="text-xl font-bold">{totalProtein}g</div>
-                </div>
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <div className="text-sm text-gray-500">Carbs</div>
-                  <div className="text-xl font-bold">{totalCarbs}g</div>
-                </div>
-                <div className="bg-white p-3 rounded-md shadow-sm">
-                  <div className="text-sm text-gray-500">Fat</div>
-                  <div className="text-xl font-bold">{totalFat}g</div>
-                </div>
-              </div>
-            </div>
+            <NutritionSummary
+              calories={totalCalories}
+              protein={totalProtein}
+              carbs={totalCarbs}
+              fat={totalFat}
+            />
             
             <div className="mb-6 flex justify-between items-center">
               <h2 className="text-xl font-semibold">Meals</h2>
@@ -294,136 +238,16 @@ const NutritionNew = () => {
             </div>
             
             {meals.map((meal, mealIndex) => (
-              <Card key={mealIndex} className="mb-8">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div className="flex-1">
-                    <Input
-                      placeholder="Meal Name"
-                      value={meal.name}
-                      onChange={(e) => handleMealChange(mealIndex, 'name', e.target.value)}
-                      className="font-semibold text-lg border-none focus-visible:ring-0 p-0 h-auto"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeMeal(mealIndex)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-500" />
-                  </Button>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Time</Label>
-                      <Input
-                        type="time"
-                        value={meal.time}
-                        onChange={(e) => handleMealChange(mealIndex, 'time', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Day</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={7}
-                        value={meal.day}
-                        onChange={(e) => handleMealChange(mealIndex, 'day', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div>
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-medium">Food Items</h3>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addFood(mealIndex)}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Food
-                      </Button>
-                    </div>
-                    
-                    <div className="space-y-6">
-                      {(meal.foods || []).map((food, foodIndex) => (
-                        <div key={foodIndex} className="relative">
-                          {foodIndex > 0 && <Separator className="my-4" />}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Food Name</Label>
-                              <Input
-                                placeholder="e.g., Chicken Breast"
-                                value={food.name}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'name', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Amount</Label>
-                              <Input
-                                placeholder="e.g., 100g, 1 cup"
-                                value={food.amount}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'amount', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Calories</Label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={food.calories}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'calories', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Protein (g)</Label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={food.protein}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'protein', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Carbs (g)</Label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={food.carbs}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'carbs', e.target.value)}
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>Fat (g)</Label>
-                              <Input
-                                type="number"
-                                min={0}
-                                value={food.fat}
-                                onChange={(e) => handleFoodChange(mealIndex, foodIndex, 'fat', e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute top-0 right-0"
-                            onClick={() => removeFood(mealIndex, foodIndex)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <MealForm
+                key={mealIndex}
+                meal={meal}
+                mealIndex={mealIndex}
+                onMealChange={handleMealChange}
+                onMealRemove={removeMeal}
+                onFoodAdd={addFood}
+                onFoodChange={handleFoodChange}
+                onFoodRemove={removeFood}
+              />
             ))}
             
             <div className="flex justify-end">
