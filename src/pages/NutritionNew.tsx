@@ -25,7 +25,7 @@ const NutritionNew = () => {
       name: 'Breakfast', 
       time: '08:00', 
       day: 1,
-      foods: [{ name: '', amount: '', calories: 0, protein: 0, carbs: 0, fat: 0 }] 
+      foods: [{ id: `temp-${Date.now()}-0`, name: '', amount: '', calories: 0, protein: 0, carbs: 0, fat: 0 }] 
     }
   ]);
 
@@ -72,7 +72,7 @@ const NutritionNew = () => {
         name: 'Meal', 
         time: '12:00', 
         day: 1,
-        foods: [{ name: '', amount: '', calories: 0, protein: 0, carbs: 0, fat: 0 }] 
+        foods: [{ id: `temp-${Date.now()}-${meals.length}`, name: '', amount: '', calories: 0, protein: 0, carbs: 0, fat: 0 }] 
       }
     ]);
   };
@@ -89,13 +89,24 @@ const NutritionNew = () => {
 
   const addFood = (mealIndex: number) => {
     const updatedMeals = [...meals];
+    const currentFoods = updatedMeals[mealIndex].foods || [];
+    
     updatedMeals[mealIndex] = {
       ...updatedMeals[mealIndex],
       foods: [
-        ...(updatedMeals[mealIndex].foods || []),
-        { name: '', amount: '', calories: 0, protein: 0, carbs: 0, fat: 0 }
+        ...currentFoods,
+        { 
+          id: `temp-${Date.now()}-${mealIndex}-${currentFoods.length}`,
+          name: '', 
+          amount: '', 
+          calories: 0, 
+          protein: 0, 
+          carbs: 0, 
+          fat: 0 
+        }
       ]
     };
+    
     setMeals(updatedMeals);
   };
 
