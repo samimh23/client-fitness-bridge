@@ -2,10 +2,38 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Users, Dumbbell, Apple, ClipboardList } from 'lucide-react';
+import { ArrowRight, Users, Dumbbell, Apple, ClipboardList, LogIn } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Check if already logged in
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        if (user.isAuthenticated) {
+          setIsAuthenticated(true);
+          setUserRole(user.role);
+        }
+      } catch (e) {
+        // Invalid JSON, clear it
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+  
+  const handleMainButtonClick = () => {
+    if (isAuthenticated) {
+      navigate(userRole === 'coach' ? '/dashboard' : '/client-app');
+    } else {
+      navigate('/login');
+    }
+  };
   
   const featureItems = [
     {
@@ -87,15 +115,28 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Button 
-              onClick={() => navigate('/dashboard')} 
+              onClick={handleMainButtonClick} 
               size="lg" 
               className="group"
             >
-              Get Started
+              {isAuthenticated ? 'Go to Dashboard' : 'Get Started'}
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
+            
+            {!isAuthenticated && (
+              <Button 
+                onClick={() => navigate('/login')} 
+                size="lg" 
+                variant="outline"
+                className="group"
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Login / Sign Up
+              </Button>
+            )}
           </motion.div>
         </div>
       </section>
@@ -132,12 +173,12 @@ const Index = () => {
           <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Coaching Business?</h2>
           <p className="text-xl mb-8 max-w-3xl mx-auto">Seamlessly manage clients, create personalized workout and nutrition plans, and take your coaching to the next level.</p>
           <Button 
-            onClick={() => navigate('/dashboard')} 
+            onClick={handleMainButtonClick} 
             variant="secondary"
             size="lg"
             className="group"
           >
-            Start Now
+            {isAuthenticated ? 'Go to Dashboard' : 'Start Now'}
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </div>

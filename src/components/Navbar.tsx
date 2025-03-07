@@ -1,13 +1,17 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Users, Dumbbell, Apple, Home } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Users, Dumbbell, Apple, Home, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -26,6 +30,25 @@ const Navbar = () => {
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
+  
+  // Get user info
+  useEffect(() => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        setUserEmail(user.email || 'Coach');
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    }
+  }, []);
+  
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully');
+    navigate('/login');
+  };
   
   const navigationItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
@@ -52,7 +75,7 @@ const Navbar = () => {
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex md:space-x-10">
+          <nav className="hidden md:flex md:space-x-4 md:items-center">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
@@ -68,6 +91,23 @@ const Navbar = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {/* User info and logout */}
+            {userEmail && (
+              <div className="flex items-center ml-4">
+                <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm font-medium mr-2">
+                  {userEmail}
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  className="text-gray-500 hover:text-primary"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </nav>
           
           {/* Mobile menu button */}
@@ -110,6 +150,22 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
+          
+          {/* Mobile logout button */}
+          {userEmail && (
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <div className="px-3 py-1 text-sm text-gray-500">
+                Logged in as: <span className="font-medium">{userEmail}</span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="w-5 h-5 mr-3" />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>
