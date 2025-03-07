@@ -14,8 +14,12 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
-    const userJson = localStorage.getItem('user');
+    // Check if user is authenticated in either localStorage or sessionStorage
+    const localUserJson = localStorage.getItem('user');
+    const sessionUserJson = sessionStorage.getItem('user');
+    
+    // Use localStorage data first, then fallback to sessionStorage
+    const userJson = localUserJson || sessionUserJson;
     
     if (userJson) {
       try {
@@ -25,6 +29,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
       } catch (e) {
         setIsAuthenticated(false);
         localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
       }
     } else {
       setIsAuthenticated(false);

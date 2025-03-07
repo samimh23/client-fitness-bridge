@@ -7,8 +7,13 @@ export default function Login() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    // Check if already logged in
-    const userJson = localStorage.getItem('user');
+    // Check if already logged in from either localStorage or sessionStorage
+    const localUserJson = localStorage.getItem('user');
+    const sessionUserJson = sessionStorage.getItem('user');
+    
+    // Use localStorage data first, then fallback to sessionStorage
+    const userJson = localUserJson || sessionUserJson;
+    
     if (userJson) {
       try {
         const user = JSON.parse(userJson);
@@ -22,6 +27,7 @@ export default function Login() {
       } catch (e) {
         // Invalid JSON, clear it
         localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
       }
     }
   }, [navigate]);
