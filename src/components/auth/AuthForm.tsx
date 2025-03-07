@@ -1,21 +1,148 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
-import { UserRole } from './types';
+import { UserRole, AuthFormState } from './types';
+import { toast } from 'sonner';
+
+const AUTO_LOGOUT_TIME = 5;
 
 export default function AuthForm() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [inactivityTimer, setInactivityTimer] = useState<NodeJS.Timeout | null>(null);
+  const [lastActivity, setLastActivity] = useState(Date.now());
 
-  // Form state
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('coach');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [formState, setFormState] = useState<AuthFormState>({
+    email: '',
+    password: '',
+    role: 'coach',
+    rememberMe: false,
+  });
+
+  const updateFormState = (field: keyof AuthFormState, value: any) => {
+    setFormState(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    setLastActivity(Date.now());
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const userData = {
+        email: formState.email,
+        role: formState.role,
+        isAuthenticated: true,
+        lastActive: new Date().toISOString(),
+      };
+      
+      if (formState.rememberMe) {
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('user');
+      }
+      
+      toast.success('Logged in successfully!');
+      
+      if (formState.role === 'coach') {
+        navigate('/dashboard');
+      } else {
+        navigate('/client-app');
+      }
+    } catch (error) {
+      toast.error('Authentication failed. Please try again.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success('Account created successfully! You can now log in.');
+      
+      setActiveTab('login');
+      
+      setFormState(prev => ({
+        ...prev,
+        password: ''
+      }));
+    } catch (error) {
+      toast.error('Account creation failed. Please try again.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const setupInactivityTimer = () => {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      
+      const timer = setTimeout(() => {
+        const localUserJson = localStorage.getItem('user');
+        const sessionUserJson = sessionStorage.getItem('user');
+        
+        if (localUserJson || sessionUserJson) {
+          const inactiveTimeMs = Date.now() - lastActivity;
+          const inactiveTimeMinutes = inactiveTimeMs / (1000 * 60);
+          
+          if (inactiveTimeMinutes >= AUTO_LOGOUT_TIME) {
+            localStorage.removeItem('user');
+            sessionStorage.removeItem('user');
+            
+            toast.info(`You've been logged out due to inactivity.`);
+            
+            if (window.location.pathname !== '/login') {
+              window.location.href = '/login';
+            }
+          }
+        }
+        
+        setupInactivityTimer();
+      }, 60000);
+      
+      setInactivityTimer(timer);
+    };
+    
+    setupInactivityTimer();
+    
+    const handleActivity = () => {
+      setLastActivity(Date.now());
+    };
+    
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('click', handleActivity);
+    
+    return () => {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer);
+      }
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('click', handleActivity);
+    };
+  }, [inactivityTimer, lastActivity]);
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
@@ -32,28 +159,20 @@ export default function AuthForm() {
 
         <TabsContent value="login" className="space-y-4 pt-4">
           <LoginForm 
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            role={role}
-            setRole={setRole}
-            rememberMe={rememberMe}
-            setRememberMe={setRememberMe}
+            formState={formState}
+            updateFormState={updateFormState}
             isLoading={isLoading}
             onForgotPasswordClick={() => setForgotPasswordOpen(true)}
+            onSubmit={handleLoginSubmit}
           />
         </TabsContent>
 
         <TabsContent value="signup" className="space-y-4 pt-4">
           <SignupForm 
-            email={email}
-            setEmail={setEmail}
-            password={password}
-            setPassword={setPassword}
-            role={role}
-            setRole={setRole}
+            formState={formState}
+            updateFormState={updateFormState}
             isLoading={isLoading}
+            onSubmit={handleSignupSubmit}
           />
         </TabsContent>
       </Tabs>

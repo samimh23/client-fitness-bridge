@@ -18,6 +18,31 @@ export default function Login() {
       try {
         const user = JSON.parse(userJson);
         if (user.isAuthenticated) {
+          // Check if lastActive timestamp exists and is within the last 24 hours
+          if (user.lastActive) {
+            const lastActive = new Date(user.lastActive);
+            const now = new Date();
+            const hoursSinceLastActive = (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60);
+            
+            // If user has been inactive for more than 24 hours, don't auto-login
+            if (hoursSinceLastActive > 24) {
+              localStorage.removeItem('user');
+              sessionStorage.removeItem('user');
+              return;
+            }
+          }
+          
+          // Update lastActive timestamp
+          user.lastActive = new Date().toISOString();
+          
+          // Save updated user data
+          if (localUserJson) {
+            localStorage.setItem('user', JSON.stringify(user));
+          } else {
+            sessionStorage.setItem('user', JSON.stringify(user));
+          }
+          
+          // Redirect based on role
           if (user.role === 'coach') {
             navigate('/dashboard');
           } else {

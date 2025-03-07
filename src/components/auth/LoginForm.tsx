@@ -1,104 +1,132 @@
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { LogIn } from 'lucide-react';
-import { toast } from 'sonner';
-import { UserRole } from './types';
-
-interface LoginFormProps {
-  email: string;
-  setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
-  role: UserRole;
-  setRole: (role: UserRole) => void;
-  rememberMe: boolean;
-  setRememberMe: (rememberMe: boolean) => void;
-  isLoading: boolean;
-  onForgotPasswordClick: () => void;
-}
+import { LogIn, Mail, AlertCircle } from 'lucide-react';
+import PasswordInput from './PasswordInput';
+import SocialLoginButtons from './SocialLoginButtons';
+import { LoginFormProps } from './types';
 
 export default function LoginForm({
-  email,
-  setEmail,
-  password,
-  setPassword,
-  role,
-  setRole,
-  rememberMe,
-  setRememberMe,
+  formState,
+  updateFormState,
   isLoading,
   onForgotPasswordClick,
+  onSubmit
 }: LoginFormProps) {
-  const navigate = useNavigate();
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTimer, setLockoutTimer] = useState<number | null>(null);
+  const [validationErrors, setValidationErrors] = useState<{
+    email?: string;
+    password?: string;
+  }>({});
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateField = (field: string, value: string) => {
+    if (field === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!value) {
+        return 'Email is required';
+      } else if (!emailRegex.test(value)) {
+        return 'Please enter a valid email address';
+      }
+    } else if (field === 'password') {
+      if (!value) {
+        return 'Password is required';
+      } else if (value.length < 6) {
+        return 'Password must be at least 6 characters';
+      }
+    }
+    return '';
+  };
+
+  const handleInputChange = (field: 'email' | 'password', value: string) => {
+    updateFormState(field, value);
+    
+    const error = validateField(field, value);
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: error
+    }));
+  };
+
+  const simulateFailedLogin = () => {
+    const newFailedAttempts = failedAttempts + 1;
+    setFailedAttempts(newFailedAttempts);
+    
+    if (newFailedAttempts >= 3) {
+      setIsLocked(true);
+      
+      const timer = window.setTimeout(() => {
+        setIsLocked(false);
+        setFailedAttempts(0);
+      }, 30000);
+      
+      setLockoutTimer(timer);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (lockoutTimer) {
+        clearTimeout(lockoutTimer);
+      }
+    };
+  }, [lockoutTimer]);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      // In a real app, this would call an authentication API
-      // For this demo, we'll simulate authentication
-      
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Store user info in localStorage or sessionStorage based on rememberMe
-      const userData = {
-        email,
-        role,
-        isAuthenticated: true
-      };
-      
-      if (rememberMe) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        // Clear any existing localStorage to prevent conflicts
-        localStorage.removeItem('user');
-      }
-      
-      // Show success toast
-      toast.success('Logged in successfully!');
-      
-      // Redirect based on role
-      if (role === 'coach') {
-        navigate('/dashboard');
-      } else {
-        navigate('/client-app');
-      }
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
-      console.error(error);
+    const emailError = validateField('email', formState.email);
+    const passwordError = validateField('password', formState.password);
+    
+    setValidationErrors({
+      email: emailError,
+      password: passwordError
+    });
+    
+    if (emailError || passwordError) {
+      return;
     }
+    
+    if (formState.password === 'wrong') {
+      simulateFailedLogin();
+      return;
+    }
+    
+    onSubmit(e);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input 
-          id="email"
-          type="email" 
-          placeholder="coach@example.com" 
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Mail className="h-4 w-4 text-gray-400" />
+          </div>
+          <Input 
+            id="email"
+            type="email" 
+            placeholder="coach@example.com" 
+            value={formState.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            required
+            className="pl-10"
+          />
+        </div>
+        {validationErrors.email && (
+          <p className="text-sm text-red-500 flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {validationErrors.email}
+          </p>
+        )}
       </div>
+      
       <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input 
-          id="password"
-          type="password" 
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <div className="text-right">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
           <Button 
             type="button" 
             variant="link" 
@@ -108,7 +136,18 @@ export default function LoginForm({
             Forgot password?
           </Button>
         </div>
+        <PasswordInput 
+          value={formState.password}
+          onChange={(value) => handleInputChange('password', value)}
+        />
+        {validationErrors.password && (
+          <p className="text-sm text-red-500 flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {validationErrors.password}
+          </p>
+        )}
       </div>
+      
       <div className="space-y-2">
         <Label htmlFor="role">I am a:</Label>
         <div className="flex gap-4">
@@ -118,8 +157,8 @@ export default function LoginForm({
               id="coach-role" 
               name="role" 
               value="coach"
-              checked={role === 'coach'}
-              onChange={() => setRole('coach')}
+              checked={formState.role === 'coach'}
+              onChange={() => updateFormState('role', 'coach')}
               className="h-4 w-4 text-primary"
             />
             <Label htmlFor="coach-role" className="cursor-pointer">Coach</Label>
@@ -130,28 +169,37 @@ export default function LoginForm({
               id="client-role" 
               name="role" 
               value="client"
-              checked={role === 'client'}
-              onChange={() => setRole('client')}
+              checked={formState.role === 'client'}
+              onChange={() => updateFormState('role', 'client')}
               className="h-4 w-4 text-primary"
             />
             <Label htmlFor="client-role" className="cursor-pointer">Client</Label>
           </div>
         </div>
       </div>
+      
       <div className="flex items-center space-x-2">
         <Checkbox 
           id="remember-me" 
-          checked={rememberMe} 
-          onCheckedChange={(checked) => setRememberMe(checked === true)}
+          checked={formState.rememberMe} 
+          onCheckedChange={(checked) => updateFormState('rememberMe', checked === true)}
         />
         <Label htmlFor="remember-me" className="cursor-pointer text-sm">
           Remember me
         </Label>
       </div>
+      
+      {isLocked && (
+        <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-500 text-sm flex items-center">
+          <AlertCircle className="h-4 w-4 mr-2" />
+          Account temporarily locked due to too many failed attempts. Please try again later.
+        </div>
+      )}
+      
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isLoading}
+        disabled={isLoading || isLocked}
       >
         {isLoading ? (
           <span className="flex items-center justify-center">
@@ -168,6 +216,8 @@ export default function LoginForm({
           </span>
         )}
       </Button>
+      
+      <SocialLoginButtons />
     </form>
   );
 }
