@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -14,6 +13,7 @@ const Dashboard = () => {
   const [recentClients, setRecentClients] = useState(mockClients);
   const [recentWorkouts, setRecentWorkouts] = useState(mockWorkoutPlans);
   const [recentNutrition, setRecentNutrition] = useState(mockNutritionPlans);
+  const navigate = useNavigate();
   
   // Sort clients by last activity
   useEffect(() => {
@@ -37,6 +37,10 @@ const Dashboard = () => {
     setRecentNutrition(sortedNutrition.slice(0, 2));
   }, []);
   
+  const handleClientClick = (clientId: string) => {
+    navigate(`/clients/${clientId}`);
+  };
+  
   return (
     <PageTransition>
       <div className="container mx-auto px-4 pt-24 pb-16">
@@ -55,7 +59,6 @@ const Dashboard = () => {
           </div>
         </div>
         
-        {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <Card className="glass-card">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -110,7 +113,6 @@ const Dashboard = () => {
           </Card>
         </div>
         
-        {/* Recent Clients Section */}
         <div className="mb-10">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-xl font-semibold">Recent Clients</h2>
@@ -124,7 +126,7 @@ const Dashboard = () => {
               <ClientCard 
                 key={client.id} 
                 client={client} 
-                onClick={() => console.log('Navigate to client', client.id)}
+                onClick={() => handleClientClick(client.id)}
               />
             ))}
           </div>
@@ -132,9 +134,7 @@ const Dashboard = () => {
         
         <Separator className="my-10" />
         
-        {/* Recent Plans Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Workout Plans */}
           <div>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-semibold">Recent Workout Plans</h2>
@@ -160,7 +160,6 @@ const Dashboard = () => {
             </div>
           </div>
           
-          {/* Nutrition Plans */}
           <div>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-semibold">Recent Nutrition Plans</h2>
