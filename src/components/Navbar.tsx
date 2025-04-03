@@ -1,15 +1,17 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Users, Dumbbell, Apple, Home, LogOut } from 'lucide-react';
+import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -38,6 +40,7 @@ const Navbar = () => {
       try {
         const user = JSON.parse(userJson);
         setUserEmail(user.email || 'Coach');
+        setUserName(user.name || 'Coach');
       } catch (e) {
         console.error('Error parsing user data', e);
       }
@@ -95,9 +98,23 @@ const Navbar = () => {
             {/* User info and logout */}
             {userEmail && (
               <div className="flex items-center ml-4">
-                <div className="bg-primary/10 text-primary rounded-full px-3 py-1 text-sm font-medium mr-2">
-                  {userEmail}
-                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => navigate('/profile')}
+                  className={cn(
+                    "flex items-center gap-2 rounded-full",
+                    location.pathname === '/profile' 
+                      ? "bg-primary/10 text-primary" 
+                      : "text-foreground/70 hover:text-primary hover:bg-primary/5"
+                  )}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src="/placeholder.svg" alt={userName} />
+                    <AvatarFallback className="text-xs">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden lg:inline">{userName}</span>
+                </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -150,6 +167,19 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
+          
+          <Link
+            to="/profile"
+            className={cn(
+              'block px-3 py-2 rounded-md text-base font-medium flex items-center',
+              location.pathname === '/profile'
+                ? 'text-primary bg-primary/10'
+                : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
+            )}
+          >
+            <UserRound className="w-5 h-5 mr-3" />
+            My Profile
+          </Link>
           
           {/* Mobile logout button */}
           {userEmail && (

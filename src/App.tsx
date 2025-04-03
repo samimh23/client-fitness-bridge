@@ -18,6 +18,7 @@ import ClientApp from "./pages/ClientApp";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import CoachProfile from "./pages/CoachProfile";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,12 @@ const App = () => (
             <ProtectedRoute requiredRole="coach">
               <Navbar />
               <NutritionNew />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute requiredRole="coach">
+              <Navbar />
+              <CoachProfile />
             </ProtectedRoute>
           } />
 
