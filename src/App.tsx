@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
+import ClientDetail from "./pages/ClientDetail";
 import ClientNew from "./pages/ClientNew";
 import Workouts from "./pages/Workouts";
 import WorkoutNew from "./pages/WorkoutNew";
@@ -41,6 +42,12 @@ const App = () => (
             <ProtectedRoute requiredRole="coach">
               <Navbar />
               <Clients />
+            </ProtectedRoute>
+          } />
+          <Route path="/clients/:id" element={
+            <ProtectedRoute requiredRole="coach">
+              <Navbar />
+              <ClientDetail />
             </ProtectedRoute>
           } />
           <Route path="/clients/new" element={

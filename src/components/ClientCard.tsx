@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Client } from '@/lib/types';
 import { ChevronRight, Calendar, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ interface ClientCardProps {
 
 const ClientCard = ({ client, onClick }: ClientCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
   
   // Format date to readable string
   const formatDate = (date: Date) => {
@@ -24,15 +26,23 @@ const ClientCard = ({ client, onClick }: ClientCardProps) => {
   const hasWorkout = client.workoutPlans.length > 0;
   const hasNutrition = client.nutritionPlans.length > 0;
   
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    } else {
+      navigate(`/clients/${client.id}`);
+    }
+  };
+  
   return (
     <div 
       className={cn(
-        'glass-card rounded-2xl overflow-hidden transition-all duration-300 ease-out',
+        'glass-card rounded-2xl overflow-hidden transition-all duration-300 ease-out cursor-pointer',
         isHovered ? 'translate-y-[-4px] shadow-xl' : 'shadow-md'
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div className="p-5">
         <div className="flex items-center space-x-4">

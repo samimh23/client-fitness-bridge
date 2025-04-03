@@ -57,8 +57,7 @@ const Clients = () => {
             {filteredClients.map(client => (
               <ClientCard 
                 key={client.id} 
-                client={client} 
-                onClick={() => console.log('Navigate to client', client.id)}
+                client={client}
               />
             ))}
           </div>
