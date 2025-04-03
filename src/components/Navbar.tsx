@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound } from 'lucide-react';
@@ -58,6 +57,7 @@ const Navbar = () => {
     { name: 'Clients', path: '/clients', icon: Users },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Nutrition', path: '/nutrition', icon: Apple },
+    { name: 'Profile', path: '/profile', icon: UserRound }, // Added Profile to main navigation
   ];
   
   return (
@@ -98,23 +98,6 @@ const Navbar = () => {
             {/* User info and logout */}
             {userEmail && (
               <div className="flex items-center ml-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={() => navigate('/profile')}
-                  className={cn(
-                    "flex items-center gap-2 rounded-full",
-                    location.pathname === '/profile' 
-                      ? "bg-primary/10 text-primary" 
-                      : "text-foreground/70 hover:text-primary hover:bg-primary/5"
-                  )}
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt={userName} />
-                    <AvatarFallback className="text-xs">{userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                  </Avatar>
-                  <span className="hidden lg:inline">{userName}</span>
-                </Button>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -167,19 +150,6 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
-          
-          <Link
-            to="/profile"
-            className={cn(
-              'block px-3 py-2 rounded-md text-base font-medium flex items-center',
-              location.pathname === '/profile'
-                ? 'text-primary bg-primary/10'
-                : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
-            )}
-          >
-            <UserRound className="w-5 h-5 mr-3" />
-            My Profile
-          </Link>
           
           {/* Mobile logout button */}
           {userEmail && (
