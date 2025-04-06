@@ -19,6 +19,8 @@ import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CoachProfile from "./pages/CoachProfile";
+import WorkoutPlanView from "./components/client/WorkoutPlanView";
+import NutritionPlanView from "./components/client/NutritionPlanView";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +94,16 @@ const App = () => (
           <Route path="/client-app" element={
             <ProtectedRoute requiredRole="client">
               <ClientApp />
+            </ProtectedRoute>
+          } />
+          <Route path="/client-app/workout/:planId" element={
+            <ProtectedRoute requiredRole="client">
+              <WorkoutPlanView />
+            </ProtectedRoute>
+          } />
+          <Route path="/client-app/nutrition/:planId" element={
+            <ProtectedRoute requiredRole="client">
+              <NutritionPlanView />
             </ProtectedRoute>
           } />
           

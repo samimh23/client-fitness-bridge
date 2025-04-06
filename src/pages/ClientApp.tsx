@@ -1,10 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, Dumbbell, Apple } from 'lucide-react';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 import PageTransition from '@/components/PageTransition';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { mockNutritionPlans, mockWorkoutPlans } from '@/lib/data';
@@ -31,6 +30,14 @@ export default function ClientApp() {
     localStorage.removeItem('user');
     toast.success('Logged out successfully');
     navigate('/login');
+  };
+  
+  const handleViewWorkoutPlan = (planId) => {
+    navigate(`/client-app/workout/${planId}`);
+  };
+  
+  const handleViewNutritionPlan = (planId) => {
+    navigate(`/client-app/nutrition/${planId}`);
   };
   
   return (
@@ -72,7 +79,13 @@ export default function ClientApp() {
                   <p className="text-gray-500 text-sm my-1">{plan.description}</p>
                   <div className="mt-2 flex justify-between items-center">
                     <span className="text-xs text-gray-500">{plan.duration} week plan</span>
-                    <Button size="sm" variant="outline">View Plan</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewWorkoutPlan(plan.id)}
+                    >
+                      View Plan
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -94,7 +107,13 @@ export default function ClientApp() {
                         {plan.totalProtein}g protein
                       </span>
                     </div>
-                    <Button size="sm" variant="outline">View Plan</Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewNutritionPlan(plan.id)}
+                    >
+                      View Plan
+                    </Button>
                   </div>
                 </div>
               ))}
