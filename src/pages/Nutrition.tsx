@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Search, Apple, Calculator } from 'lucide-react';
@@ -15,12 +15,17 @@ const Nutrition = () => {
   const [nutritionPlans, setNutritionPlans] = useState<NutritionPlan[]>(mockNutritionPlans);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('plans');
+  const navigate = useNavigate();
   
   // Filter nutrition plans based on search query
   const filteredNutritionPlans = nutritionPlans.filter(plan => 
     plan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     plan.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  const handlePlanClick = (planId: string) => {
+    navigate(`/nutrition/${planId}`);
+  };
   
   return (
     <PageTransition>
@@ -78,7 +83,7 @@ const Nutrition = () => {
                     duration={plan.duration}
                     createdAt={plan.createdAt}
                     clientCount={plan.assignedToClientIds.length}
-                    onClick={() => console.log('Navigate to nutrition plan', plan.id)}
+                    onClick={() => handlePlanClick(plan.id)}
                   />
                 ))}
               </div>

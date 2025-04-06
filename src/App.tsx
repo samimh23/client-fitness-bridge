@@ -14,6 +14,7 @@ import Workouts from "./pages/Workouts";
 import WorkoutNew from "./pages/WorkoutNew";
 import Nutrition from "./pages/Nutrition";
 import NutritionNew from "./pages/NutritionNew";
+import NutritionPlanDetail from "./pages/NutritionPlanDetail";
 import ClientApp from "./pages/ClientApp";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
@@ -81,6 +82,12 @@ const App = () => (
             <ProtectedRoute requiredRole="coach">
               <Navbar />
               <NutritionNew />
+            </ProtectedRoute>
+          } />
+          <Route path="/nutrition/:id" element={
+            <ProtectedRoute requiredRole="coach">
+              <Navbar />
+              <NutritionPlanDetail />
             </ProtectedRoute>
           } />
           <Route path="/profile" element={
