@@ -12,6 +12,7 @@ import ClientDetail from "./pages/ClientDetail";
 import ClientNew from "./pages/ClientNew";
 import Workouts from "./pages/Workouts";
 import WorkoutNew from "./pages/WorkoutNew";
+import WorkoutPlanDetail from "./pages/WorkoutPlanDetail";
 import Nutrition from "./pages/Nutrition";
 import NutritionNew from "./pages/NutritionNew";
 import NutritionPlanDetail from "./pages/NutritionPlanDetail";
@@ -70,6 +71,12 @@ const App = () => (
             <ProtectedRoute requiredRole="coach">
               <Navbar />
               <WorkoutNew />
+            </ProtectedRoute>
+          } />
+          <Route path="/workouts/:id" element={
+            <ProtectedRoute requiredRole="coach">
+              <Navbar />
+              <WorkoutPlanDetail />
             </ProtectedRoute>
           } />
           <Route path="/nutrition" element={

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Search, Dumbbell } from 'lucide-react';
@@ -12,12 +12,17 @@ import { WorkoutPlan } from '@/lib/types';
 const Workouts = () => {
   const [workoutPlans, setWorkoutPlans] = useState<WorkoutPlan[]>(mockWorkoutPlans);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   
   // Filter workout plans based on search query
   const filteredWorkoutPlans = workoutPlans.filter(plan => 
     plan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     plan.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  const handlePlanClick = (planId: string) => {
+    navigate(`/workouts/${planId}`);
+  };
   
   return (
     <PageTransition>
@@ -64,7 +69,7 @@ const Workouts = () => {
                 duration={plan.duration}
                 createdAt={plan.createdAt}
                 clientCount={plan.assignedToClientIds.length}
-                onClick={() => console.log('Navigate to workout plan', plan.id)}
+                onClick={() => handlePlanClick(plan.id)}
               />
             ))}
           </div>
