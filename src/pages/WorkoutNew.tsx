@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,10 +17,34 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const WORKOUT_PLAN_TYPES = [
-  { id: 'strength', name: 'Strength Training', icon: Dumbbell },
-  { id: 'cardio', name: 'Cardio', icon: Heart },
-  { id: 'flexibility', name: 'Flexibility', icon: Activity },
-  { id: 'hybrid', name: 'Hybrid', icon: LayoutPanelLeft },
+  { 
+    id: 'strength', 
+    name: 'Strength Training', 
+    icon: Dumbbell,
+    color: 'bg-red-50 border-red-200 text-red-700',
+    gradient: 'from-red-100 to-red-200'
+  },
+  { 
+    id: 'cardio', 
+    name: 'Cardio', 
+    icon: Heart,
+    color: 'bg-green-50 border-green-200 text-green-700',
+    gradient: 'from-green-100 to-green-200'
+  },
+  { 
+    id: 'flexibility', 
+    name: 'Flexibility', 
+    icon: Activity,
+    color: 'bg-purple-50 border-purple-200 text-purple-700',
+    gradient: 'from-purple-100 to-purple-200'
+  },
+  { 
+    id: 'hybrid', 
+    name: 'Hybrid', 
+    icon: LayoutPanelLeft,
+    color: 'bg-blue-50 border-blue-200 text-blue-700',
+    gradient: 'from-blue-100 to-blue-200'
+  },
 ];
 
 const WorkoutNew = () => {
@@ -41,12 +64,9 @@ const WorkoutNew = () => {
   const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("details");
 
-  // Calculate stats for the preview
   const calculateStats = () => {
-    // Get today's date for the overview card
     const today = new Date();
     
-    // Find the highest day number to determine weekly frequency
     const highestDay = Math.max(...exercises.map(ex => ex.day || 1));
     const weeklyFrequency = Math.min(highestDay, 7);
     
@@ -130,7 +150,6 @@ const WorkoutNew = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple validation
     if (!planData.name.trim()) {
       toast.error('Please enter a plan name');
       return;
@@ -142,7 +161,6 @@ const WorkoutNew = () => {
       return;
     }
     
-    // In a real application, we would save the workout plan to a database
     const newWorkoutPlan = {
       id: `workout-${Date.now()}`,
       name: planData.name,
@@ -157,19 +175,17 @@ const WorkoutNew = () => {
       assignedToClientIds: []
     };
     
-    // Simulate adding to the database
     console.log('New workout plan created:', newWorkoutPlan);
     
     toast.success('Workout plan created successfully!');
     navigate('/workouts');
   };
 
-  // Stats for the preview card
   const stats = calculateStats();
 
   return (
     <PageTransition>
-      <div className="container mx-auto px-4 pt-24 pb-16">
+      <div className="container mx-auto px-4 pt-24 pb-16 bg-gradient-to-br from-blue-50 to-white">
         <div className="flex items-center mb-6 bg-white p-4 rounded-lg shadow-sm sticky top-16 z-10">
           <Button 
             variant="ghost" 
@@ -211,9 +227,19 @@ const WorkoutNew = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="details" className="text-sm">Plan Details</TabsTrigger>
-                <TabsTrigger value="exercises" className="text-sm">Exercises</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gradient-to-r from-blue-100 to-blue-200">
+                <TabsTrigger 
+                  value="details" 
+                  className={`text-sm ${activeTab === 'details' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-900'}`}
+                >
+                  Plan Details
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="exercises" 
+                  className={`text-sm ${activeTab === 'exercises' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-900'}`}
+                >
+                  Exercises
+                </TabsTrigger>
               </TabsList>
               
               <form id="workout-form" onSubmit={handleSubmit}>
@@ -225,9 +251,9 @@ const WorkoutNew = () => {
                     onChange={handlePlanChange}
                   />
                   
-                  <Card>
+                  <Card className="border-primary/20 shadow-lg">
                     <CardHeader>
-                      <CardTitle>Workout Type</CardTitle>
+                      <CardTitle className="text-xl text-primary">Workout Type</CardTitle>
                       <CardDescription>Select the primary focus of this workout plan</CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -235,15 +261,15 @@ const WorkoutNew = () => {
                         {WORKOUT_PLAN_TYPES.map((type) => (
                           <div 
                             key={type.id}
-                            className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                              planData.type === type.id 
-                                ? 'border-primary bg-primary/5 shadow-sm' 
+                            className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all 
+                              ${planData.type === type.id 
+                                ? `${type.color} border-primary bg-gradient-to-br ${type.gradient} shadow-md` 
                                 : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
-                            }`}
+                              }`}
                             onClick={() => setPlanData(prev => ({ ...prev, type: type.id }))}
                           >
-                            <type.icon className={`h-8 w-8 mb-2 ${planData.type === type.id ? 'text-primary' : 'text-gray-500'}`} />
-                            <span className={`text-sm font-medium ${planData.type === type.id ? 'text-primary' : 'text-gray-700'}`}>
+                            <type.icon className={`h-8 w-8 mb-2 ${planData.type === type.id ? 'text-white' : 'text-gray-500'}`} />
+                            <span className={`text-sm font-medium ${planData.type === type.id ? 'text-white' : 'text-gray-700'}`}>
                               {type.name}
                             </span>
                           </div>
@@ -275,7 +301,7 @@ const WorkoutNew = () => {
                   updatedAt={stats.updatedAt}
                   totalExercises={stats.totalExercises}
                   weeklyFrequency={stats.weeklyFrequency}
-                  className="mb-5"
+                  className="mb-5 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-md"
                 />
                 
                 <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-md mb-5">
@@ -312,27 +338,33 @@ const WorkoutNew = () => {
                 </Card>
                 
                 {planData.name && (
-                  <Card className="border-primary/10 shadow-md mb-5">
+                  <Card className="border-primary/10 shadow-md mb-5 bg-gradient-to-br from-white to-blue-50">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">
+                      <CardTitle className="text-lg text-primary">
                         Plan Summary
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
                         <div>
-                          <h3 className="font-medium">{planData.name || "Untitled Plan"}</h3>
+                          <h3 className="font-medium text-xl text-gray-800">{planData.name || "Untitled Plan"}</h3>
                           <p className="text-sm text-gray-500 mt-1">{planData.description || "No description provided"}</p>
                         </div>
                         
                         <div className="flex flex-wrap gap-2">
-                          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                          <Badge 
+                            variant="secondary" 
+                            className={`
+                              ${WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.color} 
+                              border-opacity-50 hover:bg-opacity-20
+                            `}
+                          >
                             {WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.name || "Custom"}
                           </Badge>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
                             {planData.duration} weeks
                           </Badge>
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                             {exercises.filter(ex => ex.name).length} exercises
                           </Badge>
                         </div>
