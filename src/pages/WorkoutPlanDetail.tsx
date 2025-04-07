@@ -10,12 +10,23 @@ import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import { mockWorkoutPlans, mockClients } from '@/lib/data';
 import { WorkoutPlan, Exercise, Client } from '@/lib/types';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const WorkoutPlanDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [assignedClients, setAssignedClients] = useState<Client[]>([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
   useEffect(() => {
     // Find the plan in mock data
@@ -45,13 +56,19 @@ const WorkoutPlanDetail = () => {
   }
   
   const handleDelete = () => {
+    // Close the dialog
+    setShowDeleteDialog(false);
+    
     // In a real app, you would delete from a database
+    // Here we just show a toast and navigate away
     toast.success('Workout plan deleted successfully');
     navigate('/workouts');
   };
   
   const handleEdit = () => {
-    toast.info('Edit functionality not implemented yet');
+    // Navigate to edit page (in a real app this would go to an edit form)
+    // For now, let's just show a toast
+    navigate(`/workouts/edit/${id}`);
   };
   
   if (!plan) {
@@ -97,12 +114,34 @@ const WorkoutPlanDetail = () => {
               <PenLine className="mr-2 h-4 w-4" />
               Edit Plan
             </Button>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button 
+              variant="destructive" 
+              onClick={() => setShowDeleteDialog(true)}
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </Button>
           </div>
         </div>
+        
+        {/* Alert Dialog for Delete Confirmation */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure you want to delete this workout plan?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the workout plan
+                {assignedClients.length > 0 && " and remove it from all assigned clients"}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card>

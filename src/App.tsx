@@ -79,6 +79,12 @@ const App = () => (
               <WorkoutPlanDetail />
             </ProtectedRoute>
           } />
+          <Route path="/workouts/edit/:id" element={
+            <ProtectedRoute requiredRole="coach">
+              <Navbar />
+              <WorkoutNew />
+            </ProtectedRoute>
+          } />
           <Route path="/nutrition" element={
             <ProtectedRoute requiredRole="coach">
               <Navbar />
