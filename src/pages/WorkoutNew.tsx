@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Activity } from 'lucide-react';
+import { ArrowLeft, Save, Activity, Dumbbell, Heart, LayoutPanelLeft, Lightbulb, InfoIcon } from 'lucide-react';
 import PageTransition from '@/components/PageTransition';
 import { Exercise, WorkoutPlan } from '@/lib/types';
 import { ExerciseWithVideo } from '@/lib/exerciseApi';
@@ -11,12 +11,17 @@ import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
 import ExerciseList from '@/components/workout/ExerciseList';
 import PlanOverviewCard from '@/components/workout/PlanOverviewCard';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const WORKOUT_PLAN_TYPES = [
-  { id: 'strength', name: 'Strength Training', icon: 'Dumbbell' },
-  { id: 'cardio', name: 'Cardio', icon: 'Heart' },
-  { id: 'flexibility', name: 'Flexibility', icon: 'Stretch' },
-  { id: 'hybrid', name: 'Hybrid', icon: 'Activity' },
+  { id: 'strength', name: 'Strength Training', icon: Dumbbell },
+  { id: 'cardio', name: 'Cardio', icon: Heart },
+  { id: 'flexibility', name: 'Flexibility', icon: Activity },
+  { id: 'hybrid', name: 'Hybrid', icon: LayoutPanelLeft },
 ];
 
 const WorkoutNew = () => {
@@ -34,6 +39,7 @@ const WorkoutNew = () => {
 
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<string>("details");
 
   // Calculate stats for the preview
   const calculateStats = () => {
@@ -164,7 +170,7 @@ const WorkoutNew = () => {
   return (
     <PageTransition>
       <div className="container mx-auto px-4 pt-24 pb-16">
-        <div className="flex items-center mb-8">
+        <div className="flex items-center mb-6 bg-white p-4 rounded-lg shadow-sm sticky top-16 z-10">
           <Button 
             variant="ghost" 
             size="icon" 
@@ -173,71 +179,168 @@ const WorkoutNew = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold">Create Workout Plan</h1>
-            <p className="text-gray-500 mt-1">Design a new workout program</p>
+            <p className="text-gray-500 mt-1">Design your professional training program</p>
+          </div>
+          <div className="flex gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <InfoIcon className="h-4 w-4 mr-2" />
+                  Help
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-2">
+                  <h3 className="font-medium">Creating Effective Workouts</h3>
+                  <p className="text-sm text-muted-foreground">
+                    A good workout plan typically includes 3-5 days per week of training with balanced exercises. 
+                    Focus on progressive overload and include rest days.
+                  </p>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <Button type="submit" form="workout-form" className="shadow-md hover:shadow-lg transition-shadow">
+              <Save className="mr-2 h-4 w-4" />
+              Save Workout
+            </Button>
           </div>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit}>
-              <PlanDetailsForm
-                name={planData.name}
-                description={planData.description}
-                duration={planData.duration}
-                onChange={handlePlanChange}
-              />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="details" className="text-sm">Plan Details</TabsTrigger>
+                <TabsTrigger value="exercises" className="text-sm">Exercises</TabsTrigger>
+              </TabsList>
               
-              <ExerciseList
-                exercises={exercises}
-                onAddExercise={addExercise}
-                onRemoveExercise={removeExercise}
-                onExerciseChange={handleExerciseChange}
-                onOpenLibrary={openLibrary}
-                onAddFromLibrary={handleAddFromLibrary}
-              />
-              
-              <div className="mt-6 flex justify-end">
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mr-2"
-                  onClick={() => navigate('/workouts')}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Workout Plan
-                </Button>
-              </div>
-            </form>
+              <form id="workout-form" onSubmit={handleSubmit}>
+                <TabsContent value="details" className="mt-0 space-y-6">
+                  <PlanDetailsForm
+                    name={planData.name}
+                    description={planData.description}
+                    duration={planData.duration}
+                    onChange={handlePlanChange}
+                  />
+                  
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Workout Type</CardTitle>
+                      <CardDescription>Select the primary focus of this workout plan</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {WORKOUT_PLAN_TYPES.map((type) => (
+                          <div 
+                            key={type.id}
+                            className={`flex flex-col items-center justify-center p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                              planData.type === type.id 
+                                ? 'border-primary bg-primary/5 shadow-sm' 
+                                : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
+                            }`}
+                            onClick={() => setPlanData(prev => ({ ...prev, type: type.id }))}
+                          >
+                            <type.icon className={`h-8 w-8 mb-2 ${planData.type === type.id ? 'text-primary' : 'text-gray-500'}`} />
+                            <span className={`text-sm font-medium ${planData.type === type.id ? 'text-primary' : 'text-gray-700'}`}>
+                              {type.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                <TabsContent value="exercises" className="mt-0">
+                  <ExerciseList
+                    exercises={exercises}
+                    onAddExercise={addExercise}
+                    onRemoveExercise={removeExercise}
+                    onExerciseChange={handleExerciseChange}
+                    onOpenLibrary={openLibrary}
+                    onAddFromLibrary={handleAddFromLibrary}
+                  />
+                </TabsContent>
+              </form>
+            </Tabs>
           </div>
           
           <div className="order-first lg:order-last">
             <div className="sticky top-24">
-              <PlanOverviewCard 
-                createdAt={stats.createdAt}
-                updatedAt={stats.updatedAt}
-                totalExercises={stats.totalExercises}
-                weeklyFrequency={stats.weeklyFrequency}
-              />
-              
-              <div className="mt-6 p-4 border rounded-lg bg-amber-50 border-amber-200">
-                <div className="flex items-start">
-                  <Activity className="h-5 w-5 text-amber-500 mt-0.5 mr-2" />
-                  <div>
-                    <h3 className="font-medium text-amber-800">Tips</h3>
-                    <ul className="mt-2 space-y-2 text-sm text-amber-700">
-                      <li>• Aim for 1-2 rest days per week</li>
-                      <li>• Group exercises by muscle groups</li>
-                      <li>• Include both compound and isolation exercises</li>
-                      <li>• Consider progressive overload principles</li>
+              <ScrollArea className="max-h-[calc(100vh-120px)]">
+                <PlanOverviewCard 
+                  createdAt={stats.createdAt}
+                  updatedAt={stats.updatedAt}
+                  totalExercises={stats.totalExercises}
+                  weeklyFrequency={stats.weeklyFrequency}
+                  className="mb-5"
+                />
+                
+                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-md mb-5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg flex items-center text-amber-800">
+                      <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+                      Pro Tips
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3 text-sm text-amber-700">
+                      <li className="flex gap-2">
+                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">01</Badge>
+                        <span>Group exercises by muscle groups to optimize recovery</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">02</Badge>
+                        <span>Include both compound and isolation exercises</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">03</Badge>
+                        <span>Implement progressive overload by increasing weight or reps</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">04</Badge>
+                        <span>Allow 1-2 rest days between working the same muscle group</span>
+                      </li>
+                      <li className="flex gap-2">
+                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">05</Badge>
+                        <span>Periodize your program (4-6 weeks) before changing intensity</span>
+                      </li>
                     </ul>
-                  </div>
-                </div>
-              </div>
+                  </CardContent>
+                </Card>
+                
+                {planData.name && (
+                  <Card className="border-primary/10 shadow-md mb-5">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">
+                        Plan Summary
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div>
+                          <h3 className="font-medium">{planData.name || "Untitled Plan"}</h3>
+                          <p className="text-sm text-gray-500 mt-1">{planData.description || "No description provided"}</p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                            {WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.name || "Custom"}
+                          </Badge>
+                          <Badge variant="outline">
+                            {planData.duration} weeks
+                          </Badge>
+                          <Badge variant="outline">
+                            {exercises.filter(ex => ex.name).length} exercises
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </ScrollArea>
             </div>
           </div>
         </div>
