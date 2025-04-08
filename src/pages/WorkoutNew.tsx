@@ -16,6 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const WORKOUT_PLAN_TYPES = [
   { 
@@ -96,13 +98,7 @@ const WorkoutNew = () => {
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<string>("details");
-  const [animateProTips, setAnimateProTips] = useState(false);
-
-  // Trigger the animation when component mounts
-  useEffect(() => {
-    const timer = setTimeout(() => setAnimateProTips(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const [isProTipsOpen, setIsProTipsOpen] = useState(false);
 
   const calculateStats = () => {
     const today = new Date();
@@ -224,6 +220,38 @@ const WorkoutNew = () => {
   const stats = calculateStats();
   const selectedPlanType = WORKOUT_PLAN_TYPES.find(t => t.id === planData.type) || WORKOUT_PLAN_TYPES[0];
 
+  // Pro tips data organized in categories
+  const proTips = {
+    programming: [
+      "Group exercises by muscle groups to optimize recovery",
+      "Include both compound and isolation exercises for complete development",
+      "Implement progressive overload by gradually increasing weight, reps, or sets",
+      "Allow 48-72 hours rest between training the same muscle group",
+      "Periodize your program (4-6 weeks) before changing intensity to avoid plateaus"
+    ],
+    technique: [
+      "Start with compound movements when your energy is highest",
+      "Use a proper warm-up protocol before heavy lifting to prevent injury",
+      "Focus on proper form over heavy weights to prevent injuries",
+      "Use tempo variations to increase time under tension for hypertrophy",
+      "Alternate between pushing and pulling movements for balanced development"
+    ],
+    recovery: [
+      "Listen to your body and avoid overtraining - rest is when growth occurs",
+      "Incorporate mobility and stretching exercises to maintain flexibility",
+      "Include deload weeks (lighter training) every 4-6 weeks for recovery",
+      "Stay hydrated (aim for 3-4 liters daily) during training periods",
+      "Consume protein within 30 minutes post-workout for optimal recovery"
+    ],
+    planning: [
+      "Track your progress with a workout journal or fitness app",
+      "Consider your experience level when selecting exercise difficulty",
+      "Plan your workout splits based on your weekly availability",
+      "Adjust volume based on your recovery capacity and stress levels",
+      "Balance your program with cardiovascular training for heart health"
+    ]
+  };
+
   return (
     <PageTransition>
       <div className="container mx-auto px-4 pt-24 pb-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
@@ -241,6 +269,48 @@ const WorkoutNew = () => {
             <p className="text-gray-500 mt-1">Design your professional training program</p>
           </div>
           <div className="flex gap-2">
+            <Drawer open={isProTipsOpen} onOpenChange={setIsProTipsOpen}>
+              <DrawerTrigger asChild>
+                <Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300">
+                  <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
+                  Training Tips
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="max-h-[80vh]">
+                <DrawerHeader>
+                  <DrawerTitle className="flex items-center text-amber-800">
+                    <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
+                    Professional Training Tips
+                  </DrawerTitle>
+                  <DrawerDescription>
+                    Expert advice to optimize your workout plan
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="px-4 pb-6">
+                  <Accordion type="multiple" className="w-full">
+                    {Object.entries(proTips).map(([category, tips], index) => (
+                      <AccordionItem value={category} key={category} className="border-amber-100">
+                        <AccordionTrigger className="text-amber-700 hover:text-amber-800 hover:bg-amber-50 rounded-md px-2">
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </AccordionTrigger>
+                        <AccordionContent className="px-2">
+                          <ul className="space-y-2">
+                            {tips.map((tip, tipIndex) => (
+                              <li key={tipIndex} className="flex gap-2 group hover:bg-amber-50 p-2 rounded-lg transition-colors">
+                                <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5 group-hover:bg-amber-200">
+                                  {String(tipIndex + 1).padStart(2, '0')}
+                                </Badge>
+                                <span className="text-amber-700">{tip}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </div>
+              </DrawerContent>
+            </Drawer>
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-50">
@@ -353,50 +423,6 @@ const WorkoutNew = () => {
                   weeklyFrequency={stats.weeklyFrequency}
                   className={`mb-5 bg-gradient-to-br from-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-50 to-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-100 border-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-200 shadow-md`}
                 />
-                
-                <Card className={`bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-md mb-5 max-h-[500px] overflow-hidden ${animateProTips ? 'animate-fade-in' : 'opacity-0'}`}>
-                  <CardHeader className="pb-2 sticky top-0 bg-amber-50 z-10 border-b border-amber-100">
-                    <CardTitle className="text-lg flex items-center text-amber-800">
-                      <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
-                      Pro Training Tips
-                    </CardTitle>
-                  </CardHeader>
-                  <ScrollArea className="h-[400px]">
-                    <CardContent className="p-4">
-                      <ul className="space-y-3 text-sm text-amber-700">
-                        {[
-                          "Group exercises by muscle groups to optimize recovery",
-                          "Include both compound and isolation exercises for complete development",
-                          "Implement progressive overload by gradually increasing weight, reps, or sets",
-                          "Allow 48-72 hours rest between training the same muscle group",
-                          "Periodize your program (4-6 weeks) before changing intensity to avoid plateaus",
-                          "Start with compound movements when your energy is highest",
-                          "Use a proper warm-up protocol before heavy lifting to prevent injury",
-                          "Track your progress with a workout journal or fitness app",
-                          "Stay hydrated (aim for 3-4 liters daily) during training periods",
-                          "Consume protein within 30 minutes post-workout for optimal recovery",
-                          "Listen to your body and avoid overtraining - rest is when growth occurs",
-                          "Incorporate mobility and stretching exercises to maintain flexibility",
-                          "Focus on proper form over heavy weights to prevent injuries",
-                          "Include deload weeks (lighter training) every 4-6 weeks for recovery",
-                          "Consider your experience level when selecting exercise difficulty",
-                          "Alternate between pushing and pulling movements for balanced development",
-                          "Use tempo variations to increase time under tension for hypertrophy",
-                          "Plan your workout splits based on your weekly availability",
-                          "Adjust volume based on your recovery capacity and stress levels",
-                          "Balance your program with cardiovascular training for heart health"
-                        ].map((tip, index) => (
-                          <li key={index} className="flex gap-2 group hover:bg-amber-100/40 p-2 rounded-lg transition-colors">
-                            <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5 group-hover:bg-amber-200">
-                              {String(index + 1).padStart(2, '0')}
-                            </Badge>
-                            <span>{tip}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </ScrollArea>
-                </Card>
                 
                 {planData.name && (
                   <Card className={`border-${selectedPlanType.accent?.split('-')[1]}-300 shadow-md mb-5 bg-gradient-to-br from-white via-${selectedPlanType.accent?.split('-')[1]}-50 to-${selectedPlanType.accent?.split('-')[1]}-100 transition-all duration-300 hover:shadow-lg`}>
