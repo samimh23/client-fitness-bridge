@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -11,7 +10,7 @@ import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
 import ExerciseList from '@/components/workout/ExerciseList';
 import PlanOverviewCard from '@/components/workout/PlanOverviewCard';
-import WorkoutTypeSelector from '@/components/workout/WorkoutTypeSelector';
+import WorkoutTypeSelector, { WORKOUT_PLAN_TYPES } from '@/components/workout/WorkoutTypeSelector';
 import WorkoutFormHeader from '@/components/workout/WorkoutFormHeader';
 import TrainingTipsDrawer from '@/components/workout/TrainingTipsDrawer';
 import PlanSummaryCard from '@/components/workout/PlanSummaryCard';
