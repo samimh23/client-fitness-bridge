@@ -1,86 +1,20 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ArrowLeft, Save, Activity, Dumbbell, Heart, LayoutPanelLeft, Lightbulb, InfoIcon, Flame, Zap, Sparkles, BarChart2 } from 'lucide-react';
-import PageTransition from '@/components/PageTransition';
 import { Exercise, WorkoutPlan } from '@/lib/types';
 import { ExerciseWithVideo } from '@/lib/exerciseApi';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PageTransition from '@/components/PageTransition';
 import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
 import ExerciseList from '@/components/workout/ExerciseList';
 import PlanOverviewCard from '@/components/workout/PlanOverviewCard';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Drawer, DrawerContent, DrawerTrigger, DrawerHeader, DrawerTitle, DrawerDescription, DrawerClose } from '@/components/ui/drawer';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-
-const WORKOUT_PLAN_TYPES = [
-  { 
-    id: 'strength', 
-    name: 'Strength Training', 
-    icon: Dumbbell,
-    color: 'bg-red-50 border-red-200 text-red-700',
-    gradient: 'from-red-100 to-red-200',
-    accent: 'text-red-600',
-    iconBg: 'bg-red-600',
-    description: 'Build muscle & power'
-  },
-  { 
-    id: 'cardio', 
-    name: 'Cardio', 
-    icon: Heart,
-    color: 'bg-green-50 border-green-200 text-green-700',
-    gradient: 'from-green-100 to-green-200',
-    accent: 'text-green-600',
-    iconBg: 'bg-green-600',
-    description: 'Improve endurance'
-  },
-  { 
-    id: 'flexibility', 
-    name: 'Flexibility', 
-    icon: Activity,
-    color: 'bg-purple-50 border-purple-200 text-purple-700',
-    gradient: 'from-purple-100 to-purple-200',
-    accent: 'text-purple-600',
-    iconBg: 'bg-purple-600',
-    description: 'Increase range of motion'
-  },
-  { 
-    id: 'hybrid', 
-    name: 'Hybrid', 
-    icon: LayoutPanelLeft,
-    color: 'bg-blue-50 border-blue-200 text-blue-700',
-    gradient: 'from-blue-100 to-blue-200',
-    accent: 'text-blue-600',
-    iconBg: 'bg-blue-600',
-    description: 'Balanced approach'
-  },
-  { 
-    id: 'hiit', 
-    name: 'HIIT', 
-    icon: Flame,
-    color: 'bg-orange-50 border-orange-200 text-orange-700',
-    gradient: 'from-orange-100 to-orange-200',
-    accent: 'text-orange-600',
-    iconBg: 'bg-orange-600',
-    description: 'High intensity intervals'
-  },
-  { 
-    id: 'powerlifting', 
-    name: 'Powerlifting', 
-    icon: BarChart2,
-    color: 'bg-slate-50 border-slate-200 text-slate-700',
-    gradient: 'from-slate-100 to-slate-200',
-    accent: 'text-slate-600',
-    iconBg: 'bg-slate-600',
-    description: 'Focus on major lifts'
-  },
-];
+import WorkoutTypeSelector from '@/components/workout/WorkoutTypeSelector';
+import WorkoutFormHeader from '@/components/workout/WorkoutFormHeader';
+import TrainingTipsDrawer from '@/components/workout/TrainingTipsDrawer';
+import PlanSummaryCard from '@/components/workout/PlanSummaryCard';
 
 const WorkoutNew = () => {
   const navigate = useNavigate();
@@ -120,6 +54,10 @@ const WorkoutNew = () => {
       ...prev,
       [name]: name === 'duration' ? parseInt(value) || 0 : value
     }));
+  };
+
+  const handleTypeChange = (typeId: string) => {
+    setPlanData(prev => ({ ...prev, type: typeId }));
   };
 
   const handleExerciseChange = (index: number, field: keyof Exercise, value: any) => {
@@ -218,126 +156,14 @@ const WorkoutNew = () => {
   };
 
   const stats = calculateStats();
-  const selectedPlanType = WORKOUT_PLAN_TYPES.find(t => t.id === planData.type) || WORKOUT_PLAN_TYPES[0];
-
-  // Pro tips data organized in categories
-  const proTips = {
-    programming: [
-      "Group exercises by muscle groups to optimize recovery",
-      "Include both compound and isolation exercises for complete development",
-      "Implement progressive overload by gradually increasing weight, reps, or sets",
-      "Allow 48-72 hours rest between training the same muscle group",
-      "Periodize your program (4-6 weeks) before changing intensity to avoid plateaus"
-    ],
-    technique: [
-      "Start with compound movements when your energy is highest",
-      "Use a proper warm-up protocol before heavy lifting to prevent injury",
-      "Focus on proper form over heavy weights to prevent injuries",
-      "Use tempo variations to increase time under tension for hypertrophy",
-      "Alternate between pushing and pulling movements for balanced development"
-    ],
-    recovery: [
-      "Listen to your body and avoid overtraining - rest is when growth occurs",
-      "Incorporate mobility and stretching exercises to maintain flexibility",
-      "Include deload weeks (lighter training) every 4-6 weeks for recovery",
-      "Stay hydrated (aim for 3-4 liters daily) during training periods",
-      "Consume protein within 30 minutes post-workout for optimal recovery"
-    ],
-    planning: [
-      "Track your progress with a workout journal or fitness app",
-      "Consider your experience level when selecting exercise difficulty",
-      "Plan your workout splits based on your weekly availability",
-      "Adjust volume based on your recovery capacity and stress levels",
-      "Balance your program with cardiovascular training for heart health"
-    ]
-  };
 
   return (
     <PageTransition>
       <div className="container mx-auto px-4 pt-24 pb-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
-        <div className="flex items-center mb-6 bg-white p-4 rounded-xl shadow-md sticky top-16 z-10 border border-blue-100">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate('/workouts')}
-            className="mr-4 hover:bg-blue-50"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-700 bg-clip-text text-transparent">Create Workout Plan</h1>
-            <p className="text-gray-500 mt-1">Design your professional training program</p>
-          </div>
-          <div className="flex gap-2">
-            <Drawer open={isProTipsOpen} onOpenChange={setIsProTipsOpen}>
-              <DrawerTrigger asChild>
-                <Button variant="outline" size="sm" className="border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300">
-                  <Lightbulb className="h-4 w-4 mr-2 text-amber-500" />
-                  Training Tips
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="max-h-[80vh]">
-                <DrawerHeader>
-                  <DrawerTitle className="flex items-center text-amber-800">
-                    <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
-                    Professional Training Tips
-                  </DrawerTitle>
-                  <DrawerDescription>
-                    Expert advice to optimize your workout plan
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="px-4 pb-6">
-                  <Accordion type="multiple" className="w-full">
-                    {Object.entries(proTips).map(([category, tips], index) => (
-                      <AccordionItem value={category} key={category} className="border-amber-100">
-                        <AccordionTrigger className="text-amber-700 hover:text-amber-800 hover:bg-amber-50 rounded-md px-2">
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
-                        </AccordionTrigger>
-                        <AccordionContent className="px-2">
-                          <ul className="space-y-2">
-                            {tips.map((tip, tipIndex) => (
-                              <li key={tipIndex} className="flex gap-2 group hover:bg-amber-50 p-2 rounded-lg transition-colors">
-                                <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5 group-hover:bg-amber-200">
-                                  {String(tipIndex + 1).padStart(2, '0')}
-                                </Badge>
-                                <span className="text-amber-700">{tip}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </div>
-              </DrawerContent>
-            </Drawer>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                  <InfoIcon className="h-4 w-4 mr-2" />
-                  Help
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="space-y-2">
-                  <h3 className="font-medium">Creating Effective Workouts</h3>
-                  <p className="text-sm text-muted-foreground">
-                    A good workout plan typically includes 3-5 days per week of training with balanced exercises. 
-                    Focus on progressive overload and include rest days.
-                  </p>
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Button 
-              type="submit" 
-              form="workout-form" 
-              className="shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              <Save className="mr-2 h-4 w-4" />
-              Save Workout
-            </Button>
-          </div>
-        </div>
+        <WorkoutFormHeader 
+          onBackClick={() => navigate('/workouts')}
+          onOpenTips={() => setIsProTipsOpen(true)}
+        />
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
@@ -366,37 +192,10 @@ const WorkoutNew = () => {
                     onChange={handlePlanChange}
                   />
                   
-                  <Card className="border-primary/20 shadow-lg">
-                    <CardHeader>
-                      <CardTitle className="text-xl text-primary">Workout Type</CardTitle>
-                      <CardDescription>Select the primary focus of this workout plan</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {WORKOUT_PLAN_TYPES.map((type) => (
-                          <div 
-                            key={type.id}
-                            className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 cursor-pointer transition-all hover:scale-105
-                              ${planData.type === type.id 
-                                ? `${type.color} border-primary bg-gradient-to-br ${type.gradient} shadow-md` 
-                                : 'border-gray-200 hover:border-primary/50 hover:bg-gray-50'
-                              }`}
-                            onClick={() => setPlanData(prev => ({ ...prev, type: type.id }))}
-                          >
-                            <div className={`rounded-full w-12 h-12 flex items-center justify-center mb-3 ${planData.type === type.id ? type.iconBg + ' text-white' : 'bg-gray-100 ' + type.accent}`}>
-                              <type.icon className="h-6 w-6" />
-                            </div>
-                            <span className={`text-sm font-semibold mb-1 ${planData.type === type.id ? 'text-gray-800' : type.accent}`}>
-                              {type.name}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                              {type.description}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <WorkoutTypeSelector 
+                    selectedType={planData.type} 
+                    onTypeChange={handleTypeChange}
+                  />
                 </TabsContent>
                 
                 <TabsContent value="exercises" className="mt-0">
@@ -421,62 +220,18 @@ const WorkoutNew = () => {
                   updatedAt={stats.updatedAt}
                   totalExercises={stats.totalExercises}
                   weeklyFrequency={stats.weeklyFrequency}
-                  className={`mb-5 bg-gradient-to-br from-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-50 to-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-100 border-${selectedPlanType.id === 'strength' ? 'blue' : selectedPlanType.accent?.split('-')[1]}-200 shadow-md`}
+                  className={`mb-5 bg-gradient-to-br from-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-50 to-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-100 border-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-200 shadow-md`}
                 />
                 
                 {planData.name && (
-                  <Card className={`border-${selectedPlanType.accent?.split('-')[1]}-300 shadow-md mb-5 bg-gradient-to-br from-white via-${selectedPlanType.accent?.split('-')[1]}-50 to-${selectedPlanType.accent?.split('-')[1]}-100 transition-all duration-300 hover:shadow-lg`}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <span className={selectedPlanType.accent}>Plan Summary</span>
-                        <Sparkles className={`h-4 w-4 ${selectedPlanType.accent}`} />
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        <div>
-                          <h3 className="font-medium text-xl text-gray-800">{planData.name || "Untitled Plan"}</h3>
-                          <p className="text-sm text-gray-500 mt-1">{planData.description || "No description provided"}</p>
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2">
-                          <Badge 
-                            variant="secondary" 
-                            className={`
-                              ${selectedPlanType.color}
-                              border-opacity-50 hover:bg-opacity-20
-                            `}
-                          >
-                            {selectedPlanType.name || "Custom"}
-                          </Badge>
-                          <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                            {planData.duration} weeks
-                          </Badge>
-                          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                            {exercises.filter(ex => ex.name).length} exercises
-                          </Badge>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
-                          <div className="text-center p-2 rounded-lg bg-gray-50">
-                            <p className="text-xs text-gray-500">FREQUENCY</p>
-                            <p className="text-lg font-semibold">{stats.weeklyFrequency}x / week</p>
-                          </div>
-                          <div className="text-center p-2 rounded-lg bg-gray-50">
-                            <p className="text-xs text-gray-500">INTENSITY</p>
-                            <div className="flex justify-center gap-1 mt-1">
-                              {[1, 2, 3, 4, 5].map(i => (
-                                <Zap 
-                                  key={i} 
-                                  className={`h-4 w-4 ${i <= Math.min(Math.ceil(exercises.length / 3), 5) ? selectedPlanType.accent : 'text-gray-300'}`} 
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <PlanSummaryCard
+                    name={planData.name}
+                    description={planData.description}
+                    type={planData.type}
+                    duration={planData.duration}
+                    exerciseCount={stats.totalExercises}
+                    weeklyFrequency={stats.weeklyFrequency}
+                  />
                 )}
               </ScrollArea>
             </div>
@@ -488,6 +243,11 @@ const WorkoutNew = () => {
         isOpen={isLibraryOpen}
         onClose={closeLibrary}
         onSelectExercise={handleSelectExercise}
+      />
+
+      <TrainingTipsDrawer
+        isOpen={isProTipsOpen}
+        onOpenChange={setIsProTipsOpen}
       />
     </PageTransition>
   );
