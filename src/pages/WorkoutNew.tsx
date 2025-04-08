@@ -304,7 +304,7 @@ const WorkoutNew = () => {
                   className="mb-5 bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-md"
                 />
                 
-                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-md mb-5">
+                <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 shadow-md mb-5 max-h-96 overflow-y-auto">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center text-amber-800">
                       <Lightbulb className="mr-2 h-5 w-5 text-amber-500" />
@@ -313,26 +313,25 @@ const WorkoutNew = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3 text-sm text-amber-700">
-                      <li className="flex gap-2">
-                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">01</Badge>
-                        <span>Group exercises by muscle groups to optimize recovery</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">02</Badge>
-                        <span>Include both compound and isolation exercises</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">03</Badge>
-                        <span>Implement progressive overload by increasing weight or reps</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">04</Badge>
-                        <span>Allow 1-2 rest days between working the same muscle group</span>
-                      </li>
-                      <li className="flex gap-2">
-                        <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">05</Badge>
-                        <span>Periodize your program (4-6 weeks) before changing intensity</span>
-                      </li>
+                      {[
+                        "Group exercises by muscle groups to optimize recovery",
+                        "Include both compound and isolation exercises",
+                        "Implement progressive overload by increasing weight or reps",
+                        "Allow 1-2 rest days between working the same muscle group",
+                        "Periodize your program (4-6 weeks) before changing intensity",
+                        "Start with lighter weights to perfect form",
+                        "Track your progress with a workout journal",
+                        "Stay hydrated and maintain proper nutrition",
+                        "Listen to your body and avoid overtraining",
+                        "Incorporate mobility and stretching exercises"
+                      ].map((tip, index) => (
+                        <li key={index} className="flex gap-2">
+                          <Badge variant="outline" className="shrink-0 mt-0.5 bg-amber-100 text-amber-800 border-amber-200 h-5">
+                            {String(index + 1).padStart(2, '0')}
+                          </Badge>
+                          <span>{tip}</span>
+                        </li>
+                      ))}
                     </ul>
                   </CardContent>
                 </Card>
