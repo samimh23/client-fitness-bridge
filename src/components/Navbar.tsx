@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound } from 'lucide-react';
@@ -11,7 +12,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, role, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -36,13 +37,19 @@ const Navbar = () => {
     navigate('/login');
   };
   
-  const navigationItems = [
+  const coachNavigationItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Clients', path: '/clients', icon: Users },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Nutrition', path: '/nutrition', icon: Apple },
     { name: 'Profile', path: '/profile', icon: UserRound },
   ];
+
+  const clientNavigationItems = [
+    { name: 'Dashboard', path: '/client-app', icon: Home },
+  ];
+  
+  const navigationItems = role === 'coach' ? coachNavigationItems : clientNavigationItems;
   
   return (
     <header 

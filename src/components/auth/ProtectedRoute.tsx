@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const location = useLocation();
-  const { user, session } = useAuth();
+  const { user, session, role } = useAuth();
   
   // Not authenticated - redirect to login
   if (!session || !user) {
@@ -18,11 +18,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role check - get role from metadata
-  const userRole = user?.user_metadata?.role;
-  if (requiredRole && userRole !== requiredRole) {
+  // Role check
+  if (requiredRole && role !== requiredRole) {
     toast.error(`This area is only accessible to ${requiredRole}s`);
-    return <Navigate to={userRole === 'client' ? '/client-app' : '/dashboard'} replace />;
+    return <Navigate to={role === 'client' ? '/client-app' : '/dashboard'} replace />;
   }
 
   // Authenticated and proper role - render children

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -24,7 +23,7 @@ export default function AuthForm() {
     password: '',
     role: 'coach',
     rememberMe: false,
-    name: '', // Initialize the name property
+    name: '', 
   });
 
   const updateFormState = (field: keyof AuthFormState, value: any) => {
@@ -50,20 +49,22 @@ export default function AuthForm() {
         throw error;
       }
 
-      // Fetch user profile to get role
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', data.user?.id)
+      // Fetch user role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user?.id)
         .single();
 
-      if (profileError) {
-        throw profileError;
+      if (roleError) {
+        throw roleError;
       }
 
+      const userRole = roleData?.role || formState.role;
+      
       const userData = {
         email: data.user?.email || '',
-        role: formState.role,
+        role: userRole,
         isAuthenticated: true,
         lastActive: new Date().toISOString(),
       };
@@ -77,7 +78,7 @@ export default function AuthForm() {
       
       toast.success('Logged in successfully!');
       
-      if (formState.role === 'coach') {
+      if (userRole === 'coach') {
         navigate('/dashboard');
       } else {
         navigate('/client-app');
