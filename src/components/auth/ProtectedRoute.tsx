@@ -12,6 +12,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   const location = useLocation();
   const { user, session, role } = useAuth();
   
+  console.log('ProtectedRoute check - User:', user?.id);
+  console.log('ProtectedRoute check - Role:', role);
+  console.log('ProtectedRoute check - Required role:', requiredRole);
+  
   // Not authenticated - redirect to login
   if (!session || !user) {
     toast.error('Please log in to access this page');
@@ -20,6 +24,7 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
 
   // Role check
   if (requiredRole && role !== requiredRole) {
+    console.log(`Role mismatch: User has ${role}, but ${requiredRole} is required`);
     toast.error(`This area is only accessible to ${requiredRole}s`);
     return <Navigate to={role === 'client' ? '/client-app' : '/dashboard'} replace />;
   }

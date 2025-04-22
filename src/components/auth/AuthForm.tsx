@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -96,6 +97,7 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
+      // First, create the user account
       const { data, error } = await supabase.auth.signUp({
         email: formState.email,
         password: formState.password,
@@ -111,8 +113,14 @@ export default function AuthForm() {
         throw error;
       }
       
-      // After successful signup, insert role into user_roles table
+      // Sign in the user immediately after signup so they have the auth token for the next operation
       if (data.user) {
+        await supabase.auth.signInWithPassword({
+          email: formState.email,
+          password: formState.password
+        });
+        
+        // Now we can insert the role since the user is authenticated
         const { error: roleError } = await supabase
           .from('user_roles')
           .insert({ 
@@ -121,7 +129,9 @@ export default function AuthForm() {
           });
 
         if (roleError) {
-          throw roleError;
+          console.error("Role insertion error:", roleError);
+          // Continue with signup even if role insertion fails
+          // The role will be assigned from metadata as fallback
         }
       }
       

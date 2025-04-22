@@ -27,20 +27,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const fetchUserRole = async (userId: string) => {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .single();
 
-      if (error) {
-        console.error('Error fetching user role:', error);
-        setRole(null);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching user role from user_roles table:', error);
+          
+          // Fallback to user metadata if role not found in user_roles table
+          if (session?.user?.user_metadata?.role) {
+            console.log('Using role from user metadata:', session.user.user_metadata.role);
+            setRole(session.user.user_metadata.role as UserRole);
+          } else {
+            console.warn('No role found in metadata or user_roles table');
+            setRole(null);
+          }
+          return;
+        }
 
-      if (data) {
-        setRole(data.role as UserRole);
+        if (data) {
+          console.log('Role found in user_roles table:', data.role);
+          setRole(data.role as UserRole);
+        }
+      } catch (err) {
+        console.error('Error in fetchUserRole function:', err);
       }
     };
 
