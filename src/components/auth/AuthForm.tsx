@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
@@ -38,10 +39,28 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userData = {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formState.email,
+        password: formState.password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Fetch user profile to get role
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user?.id)
+        .single();
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      const userData = {
+        email: data.user?.email || '',
         role: formState.role,
         isAuthenticated: true,
         lastActive: new Date().toISOString(),
@@ -61,8 +80,8 @@ export default function AuthForm() {
       } else {
         navigate('/client-app');
       }
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Authentication failed. Please try again.');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -74,9 +93,22 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const { data, error } = await supabase.auth.signUp({
+        email: formState.email,
+        password: formState.password,
+        options: {
+          data: {
+            full_name: formState.name || '',  // Add this line to capture name during signup
+            role: formState.role
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
       
-      toast.success('Account created successfully! You can now log in.');
+      toast.success('Account created successfully! Please check your email to verify.');
       
       setActiveTab('login');
       
@@ -84,8 +116,8 @@ export default function AuthForm() {
         ...prev,
         password: ''
       }));
-    } catch (error) {
-      toast.error('Account creation failed. Please try again.');
+    } catch (error: any) {
+      toast.error(error.message || 'Account creation failed. Please try again.');
       console.error(error);
     } finally {
       setIsLoading(false);
