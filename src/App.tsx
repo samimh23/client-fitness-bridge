@@ -1,9 +1,9 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -28,111 +28,113 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          
-          {/* Coach Routes - Protected */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <Clients />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients/:id" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <ClientDetail />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients/new" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <ClientNew />
-            </ProtectedRoute>
-          } />
-          <Route path="/workouts" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <Workouts />
-            </ProtectedRoute>
-          } />
-          <Route path="/workouts/new" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <WorkoutNew />
-            </ProtectedRoute>
-          } />
-          <Route path="/workouts/:id" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <WorkoutPlanDetail />
-            </ProtectedRoute>
-          } />
-          <Route path="/workouts/edit/:id" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <WorkoutNew />
-            </ProtectedRoute>
-          } />
-          <Route path="/nutrition" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <Nutrition />
-            </ProtectedRoute>
-          } />
-          <Route path="/nutrition/new" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <NutritionNew />
-            </ProtectedRoute>
-          } />
-          <Route path="/nutrition/:id" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <NutritionPlanDetail />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute requiredRole="coach">
-              <Navbar />
-              <CoachProfile />
-            </ProtectedRoute>
-          } />
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            
+            {/* Coach Routes - Protected */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <Clients />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients/:id" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <ClientDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/clients/new" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <ClientNew />
+              </ProtectedRoute>
+            } />
+            <Route path="/workouts" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <Workouts />
+              </ProtectedRoute>
+            } />
+            <Route path="/workouts/new" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <WorkoutNew />
+              </ProtectedRoute>
+            } />
+            <Route path="/workouts/:id" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <WorkoutPlanDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/workouts/edit/:id" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <WorkoutNew />
+              </ProtectedRoute>
+            } />
+            <Route path="/nutrition" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <Nutrition />
+              </ProtectedRoute>
+            } />
+            <Route path="/nutrition/new" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <NutritionNew />
+              </ProtectedRoute>
+            } />
+            <Route path="/nutrition/:id" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <NutritionPlanDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute requiredRole="coach">
+                <Navbar />
+                <CoachProfile />
+              </ProtectedRoute>
+            } />
 
-          {/* Client Routes */}
-          <Route path="/client-app" element={
-            <ProtectedRoute requiredRole="client">
-              <ClientApp />
-            </ProtectedRoute>
-          } />
-          <Route path="/client-app/workout/:planId" element={
-            <ProtectedRoute requiredRole="client">
-              <WorkoutPlanView />
-            </ProtectedRoute>
-          } />
-          <Route path="/client-app/nutrition/:planId" element={
-            <ProtectedRoute requiredRole="client">
-              <NutritionPlanView />
-            </ProtectedRoute>
-          } />
-          
-          {/* Fallback routes */}
-          <Route path="/logout" element={<Navigate to="/login" />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+            {/* Client Routes */}
+            <Route path="/client-app" element={
+              <ProtectedRoute requiredRole="client">
+                <ClientApp />
+              </ProtectedRoute>
+            } />
+            <Route path="/client-app/workout/:planId" element={
+              <ProtectedRoute requiredRole="client">
+                <WorkoutPlanView />
+              </ProtectedRoute>
+            } />
+            <Route path="/client-app/nutrition/:planId" element={
+              <ProtectedRoute requiredRole="client">
+                <NutritionPlanView />
+              </ProtectedRoute>
+            } />
+            
+            {/* Fallback routes */}
+            <Route path="/logout" element={<Navigate to="/login" />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 

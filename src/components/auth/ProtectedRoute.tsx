@@ -1,7 +1,7 @@
 
-import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -10,44 +10,16 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check if user is authenticated in either localStorage or sessionStorage
-    const localUserJson = localStorage.getItem('user');
-    const sessionUserJson = sessionStorage.getItem('user');
-    
-    // Use localStorage data first, then fallback to sessionStorage
-    const userJson = localUserJson || sessionUserJson;
-    
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        setIsAuthenticated(user.isAuthenticated);
-        setUserRole(user.role);
-      } catch (e) {
-        setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('user');
-      }
-    } else {
-      setIsAuthenticated(false);
-    }
-  }, []);
-
-  // Show loading state while checking authentication
-  if (isAuthenticated === null) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
+  const { user, session } = useAuth();
+  
   // Not authenticated - redirect to login
-  if (!isAuthenticated) {
+  if (!session || !user) {
     toast.error('Please log in to access this page');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role check
+  // Role check - get role from metadata
+  const userRole = user?.user_metadata?.role;
   if (requiredRole && userRole !== requiredRole) {
     toast.error(`This area is only accessible to ${requiredRole}s`);
     return <Navigate to={userRole === 'client' ? '/client-app' : '/dashboard'} replace />;
