@@ -100,7 +100,7 @@ export default function AuthForm() {
         password: formState.password,
         options: {
           data: {
-            full_name: formState.name || '',  // Use the name from formState
+            full_name: formState.name || '',
             role: formState.role
           }
         }
@@ -108,6 +108,20 @@ export default function AuthForm() {
 
       if (error) {
         throw error;
+      }
+      
+      // After successful signup, insert role into user_roles table
+      if (data.user) {
+        const { error: roleError } = await supabase
+          .from('user_roles')
+          .insert({ 
+            user_id: data.user.id, 
+            role: formState.role 
+          });
+
+        if (roleError) {
+          throw roleError;
+        }
       }
       
       toast.success('Account created successfully! Please check your email to verify.');
