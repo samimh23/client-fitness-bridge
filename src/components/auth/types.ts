@@ -6,6 +6,7 @@ export interface AuthFormState {
   password: string;
   role: UserRole;
   rememberMe: boolean;
+  name?: string; // Added name property as optional
 }
 
 export interface LoginFormProps {

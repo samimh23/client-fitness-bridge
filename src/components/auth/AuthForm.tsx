@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,6 +24,7 @@ export default function AuthForm() {
     password: '',
     role: 'coach',
     rememberMe: false,
+    name: '', // Initialize the name property
   });
 
   const updateFormState = (field: keyof AuthFormState, value: any) => {
@@ -98,7 +100,7 @@ export default function AuthForm() {
         password: formState.password,
         options: {
           data: {
-            full_name: formState.name || '',  // Add this line to capture name during signup
+            full_name: formState.name || '',  // Use the name from formState
             role: formState.role
           }
         }

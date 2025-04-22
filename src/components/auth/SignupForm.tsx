@@ -14,7 +14,6 @@ export default function SignupForm({
   isLoading,
   onSubmit
 }: SignupFormProps) {
-  const [name, setName] = useState('');
   const [validationErrors, setValidationErrors] = useState<{
     name?: string;
     email?: string;
@@ -45,11 +44,7 @@ export default function SignupForm({
   };
 
   const handleInputChange = (field: 'name' | 'email' | 'password', value: string) => {
-    if (field === 'name') {
-      setName(value);
-    } else {
-      updateFormState(field as any, value);
-    }
+    updateFormState(field, value);
     
     // Validate on change
     const error = validateField(field, value);
@@ -63,7 +58,7 @@ export default function SignupForm({
     e.preventDefault();
     
     // Validate all fields before submission
-    const nameError = validateField('name', name);
+    const nameError = validateField('name', formState.name || '');
     const emailError = validateField('email', formState.email);
     const passwordError = validateField('password', formState.password);
     
@@ -94,7 +89,7 @@ export default function SignupForm({
             id="name" 
             type="text" 
             placeholder="John Doe" 
-            value={name}
+            value={formState.name || ''}
             onChange={(e) => handleInputChange('name', e.target.value)}
             required
             className="pl-10"
