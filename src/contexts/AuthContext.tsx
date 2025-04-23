@@ -24,10 +24,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserRole = async (userId: string) => {
       try {
+        // First try to get the role from user_roles table
         const { data, error } = await supabase
           .from('user_roles')
           .select('role')
@@ -54,11 +56,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         console.error('Error in fetchUserRole function:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -66,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await fetchUserRole(session.user.id);
         } else {
           setRole(null);
+          setIsLoading(false);
         }
       }
     );
@@ -76,6 +82,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user) {
         await fetchUserRole(session.user.id);
+      } else {
+        setIsLoading(false);
       }
     });
 

@@ -22,6 +22,13 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // No role yet - loading state or first login
+  if (requiredRole && role === null) {
+    console.log('Role is null, but authentication is successful. Waiting for role data...');
+    // Could add a loading state here if needed
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   // Role check
   if (requiredRole && role !== requiredRole) {
     console.log(`Role mismatch: User has ${role}, but ${requiredRole} is required`);

@@ -8,11 +8,13 @@ import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 import { UserRole, AuthFormState } from './types';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext'; 
 
 const AUTO_LOGOUT_TIME = 5;
 
 export default function AuthForm() {
   const navigate = useNavigate();
+  const { session, user, role } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
@@ -26,6 +28,18 @@ export default function AuthForm() {
     rememberMe: false,
     name: '', 
   });
+
+  // Handle auto redirect when already authenticated
+  useEffect(() => {
+    if (session && user && role) {
+      console.log('User already authenticated, redirecting based on role:', role);
+      if (role === 'coach') {
+        navigate('/dashboard');
+      } else if (role === 'client') {
+        navigate('/client-app');
+      }
+    }
+  }, [session, user, role, navigate]);
 
   const updateFormState = (field: keyof AuthFormState, value: any) => {
     setFormState(prev => ({
@@ -58,10 +72,10 @@ export default function AuthForm() {
         .single();
 
       if (roleError) {
-        throw roleError;
+        console.warn('Error fetching role, using metadata fallback:', roleError);
       }
 
-      const userRole = roleData?.role || formState.role;
+      const userRole = roleData?.role || data.user?.user_metadata?.role || formState.role;
       
       const userData = {
         email: data.user?.email || '',
@@ -113,32 +127,51 @@ export default function AuthForm() {
         throw error;
       }
       
+      console.log('Signup successful, now inserting role data');
+      
       // Sign in the user immediately after signup so they have the auth token for the next operation
       if (data.user) {
-        await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email: formState.email,
           password: formState.password
         });
         
-        // Now we can insert the role since the user is authenticated
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ 
-            user_id: data.user.id, 
-            role: formState.role 
-          });
+        if (signInError) {
+          console.error('Auto sign-in after signup failed:', signInError);
+        } else {
+          console.log('Auto sign-in after signup successful');
+          
+          // Now we can insert the role since the user is authenticated
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({ 
+              user_id: data.user.id, 
+              role: formState.role 
+            });
 
-        if (roleError) {
-          console.error("Role insertion error:", roleError);
-          // Continue with signup even if role insertion fails
-          // The role will be assigned from metadata as fallback
+          if (roleError) {
+            console.error("Role insertion error:", roleError);
+            // Continue with signup even if role insertion fails
+            // The role will be assigned from metadata as fallback
+          } else {
+            console.log('Role inserted successfully:', formState.role);
+            
+            // Redirect based on role
+            if (formState.role === 'coach') {
+              navigate('/dashboard');
+              return;
+            } else {
+              navigate('/client-app');
+              return;
+            }
+          }
         }
       }
       
       toast.success('Account created successfully! Please check your email to verify.');
       
+      // Only reset if we haven't already redirected
       setActiveTab('login');
-      
       setFormState(prev => ({
         ...prev,
         password: ''
