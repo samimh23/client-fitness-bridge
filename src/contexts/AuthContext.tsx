@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const fetchUserRole = async (userId: string) => {
       try {
+        console.log('Fetching role for user ID:', userId);
         // First try to get the role from user_roles table
         const { data, error } = await supabase
           .from('user_roles')
@@ -78,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Checking existing session:', session ? 'Found' : 'None');
       setSession(session);
       setUser(session?.user ?? null);
       

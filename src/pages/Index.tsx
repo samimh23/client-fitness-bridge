@@ -31,8 +31,14 @@ const Index = () => {
     if (isAuthenticated) {
       navigate(userRole === 'coach' ? '/dashboard' : '/client-app');
     } else {
+      console.log("Navigating to login page");
       navigate('/login');
     }
+  };
+  
+  const handleLoginClick = () => {
+    console.log("Login button clicked, navigating to login page");
+    navigate('/login');
   };
   
   const featureItems = [
@@ -128,7 +134,7 @@ const Index = () => {
             
             {!isAuthenticated && (
               <Button 
-                onClick={() => navigate('/login')} 
+                onClick={handleLoginClick} 
                 size="lg" 
                 variant="outline"
                 className="group"
