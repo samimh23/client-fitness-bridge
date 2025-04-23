@@ -8,6 +8,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   role: UserRole | null;
+  isLoading: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -15,6 +16,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
   role: null,
+  isLoading: true,
   signOut: async () => {},
 });
 
@@ -47,10 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.warn('No role found in metadata or user_roles table');
             setRole(null);
           }
-          return;
-        }
-
-        if (data) {
+        } else if (data) {
           console.log('Role found in user_roles table:', data.role);
           setRole(data.role as UserRole);
         }
@@ -61,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event);
@@ -76,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
+    // THEN check for existing session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -98,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, role, signOut }}>
+    <AuthContext.Provider value={{ user, session, role, isLoading, signOut }}>
       {children}
     </AuthContext.Provider>
   );
