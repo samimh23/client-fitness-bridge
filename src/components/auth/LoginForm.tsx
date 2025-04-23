@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -146,36 +147,6 @@ export default function LoginForm({
             {validationErrors.password}
           </p>
         )}
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="role">I am a:</Label>
-        <div className="flex gap-4">
-          <div className="flex items-center space-x-2">
-            <input 
-              type="radio" 
-              id="coach-role" 
-              name="role" 
-              value="coach"
-              checked={formState.role === 'coach'}
-              onChange={() => updateFormState('role', 'coach')}
-              className="h-4 w-4 text-primary"
-            />
-            <Label htmlFor="coach-role" className="cursor-pointer">Coach</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <input 
-              type="radio" 
-              id="client-role" 
-              name="role" 
-              value="client"
-              checked={formState.role === 'client'}
-              onChange={() => updateFormState('role', 'client')}
-              className="h-4 w-4 text-primary"
-            />
-            <Label htmlFor="client-role" className="cursor-pointer">Client</Label>
-          </div>
-        </div>
       </div>
       
       <div className="flex items-center space-x-2">
