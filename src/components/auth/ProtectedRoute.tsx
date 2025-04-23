@@ -3,10 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
+import { UserRole } from './types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'coach' | 'client';
+  requiredRole?: UserRole;
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {

@@ -1,4 +1,5 @@
-export type UserRole = 'coach' | 'client' | 'admin';
+
+export type UserRole = 'coach' | 'client';
 
 export interface AuthFormState {
   email: string;

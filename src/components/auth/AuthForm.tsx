@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +28,6 @@ export default function AuthForm() {
     name: '', 
   });
 
-  // Handle auto redirect when already authenticated
   useEffect(() => {
     if (session && user && role) {
       console.log('User already authenticated, redirecting based on role:', role);
@@ -64,7 +62,6 @@ export default function AuthForm() {
         throw error;
       }
 
-      // Fetch user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -111,7 +108,6 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      // First, create the user account
       const { data, error } = await supabase.auth.signUp({
         email: formState.email,
         password: formState.password,
@@ -129,7 +125,6 @@ export default function AuthForm() {
       
       console.log('Signup successful, now inserting role data');
       
-      // Sign in the user immediately after signup so they have the auth token for the next operation
       if (data.user) {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: formState.email,
@@ -141,22 +136,20 @@ export default function AuthForm() {
         } else {
           console.log('Auto sign-in after signup successful');
           
-          // Now we can insert the role since the user is authenticated
           const { error: roleError } = await supabase
             .from('user_roles')
             .insert({ 
               user_id: data.user.id, 
-              role: formState.role 
+              role: formState.role as "coach" | "client"
             });
 
           if (roleError) {
             console.error("Role insertion error:", roleError);
-            // Continue with signup even if role insertion fails
-            // The role will be assigned from metadata as fallback
+            toast.error('Account creation failed. Please try again.');
+            console.error(error);
           } else {
             console.log('Role inserted successfully:', formState.role);
             
-            // Redirect based on role
             if (formState.role === 'coach') {
               navigate('/dashboard');
               return;
@@ -170,7 +163,6 @@ export default function AuthForm() {
       
       toast.success('Account created successfully! Please check your email to verify.');
       
-      // Only reset if we haven't already redirected
       setActiveTab('login');
       setFormState(prev => ({
         ...prev,
