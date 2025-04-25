@@ -1,12 +1,11 @@
 
-export type UserRole = 'coach' | 'client';
+export type UserRole = 'coach' | 'client' | 'admin';
 
 export interface AuthFormState {
   email: string;
   password: string;
   role: UserRole;
   rememberMe: boolean;
-  name?: string;
 }
 
 export interface LoginFormProps {

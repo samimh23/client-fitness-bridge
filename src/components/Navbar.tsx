@@ -1,18 +1,18 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, role, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -27,29 +27,38 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  // Close mobile menu when route changes
   useEffect(() => {
     setIsOpen(false);
   }, [location.pathname]);
   
-  const handleLogout = async () => {
-    await signOut();
+  // Get user info
+  useEffect(() => {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        setUserEmail(user.email || 'Coach');
+        setUserName(user.name || 'Coach');
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    }
+  }, []);
+  
+  const handleLogout = () => {
+    localStorage.removeItem('user');
     toast.success('Logged out successfully');
     navigate('/login');
   };
   
-  const coachNavigationItems = [
+  const navigationItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Home },
     { name: 'Clients', path: '/clients', icon: Users },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Nutrition', path: '/nutrition', icon: Apple },
-    { name: 'Profile', path: '/profile', icon: UserRound },
+    { name: 'Profile', path: '/profile', icon: UserRound }, // Added Profile to main navigation
   ];
-
-  const clientNavigationItems = [
-    { name: 'Dashboard', path: '/client-app', icon: Home },
-  ];
-  
-  const navigationItems = role === 'coach' ? coachNavigationItems : clientNavigationItems;
   
   return (
     <header 
@@ -68,6 +77,7 @@ const Navbar = () => {
             </Link>
           </div>
           
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex md:space-x-4 md:items-center">
             {navigationItems.map((item) => (
               <Link
@@ -85,7 +95,8 @@ const Navbar = () => {
               </Link>
             ))}
             
-            {user && (
+            {/* User info and logout */}
+            {userEmail && (
               <div className="flex items-center ml-4">
                 <Button 
                   variant="ghost" 
@@ -99,6 +110,7 @@ const Navbar = () => {
             )}
           </nav>
           
+          {/* Mobile menu button */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -115,6 +127,7 @@ const Navbar = () => {
         </div>
       </div>
       
+      {/* Mobile Navigation Menu */}
       <div
         className={cn(
           'md:hidden absolute top-16 inset-x-0 transition transform origin-top duration-300 ease-in-out bg-white shadow-md',
@@ -138,10 +151,11 @@ const Navbar = () => {
             </Link>
           ))}
           
-          {user && (
+          {/* Mobile logout button */}
+          {userEmail && (
             <div className="mt-2 pt-2 border-t border-gray-200">
               <div className="px-3 py-1 text-sm text-gray-500">
-                Logged in as: <span className="font-medium">{user.email}</span>
+                Logged in as: <span className="font-medium">{userEmail}</span>
               </div>
               <button
                 onClick={handleLogout}

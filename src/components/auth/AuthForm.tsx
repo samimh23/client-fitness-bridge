@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { supabase } from '@/integrations/supabase/client';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 import { UserRole, AuthFormState } from './types';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext'; 
 
 const AUTO_LOGOUT_TIME = 5;
 
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { session, user, role } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
   const [isLoading, setIsLoading] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
@@ -25,19 +22,7 @@ export default function AuthForm() {
     password: '',
     role: 'coach',
     rememberMe: false,
-    name: '', 
   });
-
-  useEffect(() => {
-    if (session && user && role) {
-      console.log('User already authenticated, redirecting based on role:', role);
-      if (role === 'coach') {
-        navigate('/dashboard');
-      } else if (role === 'client') {
-        navigate('/client-app');
-      }
-    }
-  }, [session, user, role, navigate]);
 
   const updateFormState = (field: keyof AuthFormState, value: any) => {
     setFormState(prev => ({
@@ -53,30 +38,11 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formState.email,
-        password: formState.password
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      const { data: roleData, error: roleError } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user?.id)
-        .single();
-
-      if (roleError) {
-        console.warn('Error fetching role, using metadata fallback:', roleError);
-      }
-
-      const userRole = roleData?.role || data.user?.user_metadata?.role || formState.role;
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const userData = {
-        email: data.user?.email || '',
-        role: userRole,
+        email: formState.email,
+        role: formState.role,
         isAuthenticated: true,
         lastActive: new Date().toISOString(),
       };
@@ -90,13 +56,13 @@ export default function AuthForm() {
       
       toast.success('Logged in successfully!');
       
-      if (userRole === 'coach') {
+      if (formState.role === 'coach') {
         navigate('/dashboard');
       } else {
         navigate('/client-app');
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Authentication failed. Please try again.');
+    } catch (error) {
+      toast.error('Authentication failed. Please try again.');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -108,68 +74,18 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: formState.email,
-        password: formState.password,
-        options: {
-          data: {
-            full_name: formState.name || '',
-            role: formState.role
-          }
-        }
-      });
-
-      if (error) {
-        throw error;
-      }
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      console.log('Signup successful, now inserting role data');
-      
-      if (data.user) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: formState.email,
-          password: formState.password
-        });
-        
-        if (signInError) {
-          console.error('Auto sign-in after signup failed:', signInError);
-        } else {
-          console.log('Auto sign-in after signup successful');
-          
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({ 
-              user_id: data.user.id, 
-              role: formState.role as "coach" | "client"
-            });
-
-          if (roleError) {
-            console.error("Role insertion error:", roleError);
-            toast.error('Account creation failed. Please try again.');
-            console.error(error);
-          } else {
-            console.log('Role inserted successfully:', formState.role);
-            
-            if (formState.role === 'coach') {
-              navigate('/dashboard');
-              return;
-            } else {
-              navigate('/client-app');
-              return;
-            }
-          }
-        }
-      }
-      
-      toast.success('Account created successfully! Please check your email to verify.');
+      toast.success('Account created successfully! You can now log in.');
       
       setActiveTab('login');
+      
       setFormState(prev => ({
         ...prev,
         password: ''
       }));
-    } catch (error: any) {
-      toast.error(error.message || 'Account creation failed. Please try again.');
+    } catch (error) {
+      toast.error('Account creation failed. Please try again.');
       console.error(error);
     } finally {
       setIsLoading(false);

@@ -1,52 +1,56 @@
 
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
-import { UserRole } from './types';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: UserRole;
+  requiredRole?: 'coach' | 'client';
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
   const location = useLocation();
-  const { user, session, role, isLoading } = useAuth();
-  
-  console.log('ProtectedRoute check - User:', user?.id);
-  console.log('ProtectedRoute check - Role:', role);
-  console.log('ProtectedRoute check - Required role:', requiredRole);
-  console.log('ProtectedRoute check - isLoading:', isLoading);
-  
-  // Loading state - show loading spinner
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-gray-500">Loading your profile...</p>
-      </div>
-    );
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check if user is authenticated in either localStorage or sessionStorage
+    const localUserJson = localStorage.getItem('user');
+    const sessionUserJson = sessionStorage.getItem('user');
+    
+    // Use localStorage data first, then fallback to sessionStorage
+    const userJson = localUserJson || sessionUserJson;
+    
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        setIsAuthenticated(user.isAuthenticated);
+        setUserRole(user.role);
+      } catch (e) {
+        setIsAuthenticated(false);
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('user');
+      }
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, []);
+
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
-  
+
   // Not authenticated - redirect to login
-  if (!session || !user) {
+  if (!isAuthenticated) {
     toast.error('Please log in to access this page');
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // No role yet but authenticated
-  if (requiredRole && role === null) {
-    console.log('Role is null, but authentication is successful. This might indicate a role configuration issue.');
-    toast.error('Your account role is not properly configured. Please contact support.');
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
   // Role check
-  if (requiredRole && role !== requiredRole) {
-    console.log(`Role mismatch: User has ${role}, but ${requiredRole} is required`);
+  if (requiredRole && userRole !== requiredRole) {
     toast.error(`This area is only accessible to ${requiredRole}s`);
-    return <Navigate to={role === 'client' ? '/client-app' : '/dashboard'} replace />;
+    return <Navigate to={userRole === 'client' ? '/client-app' : '/dashboard'} replace />;
   }
 
   // Authenticated and proper role - render children
