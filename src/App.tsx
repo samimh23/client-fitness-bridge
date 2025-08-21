@@ -16,13 +16,10 @@ import WorkoutPlanDetail from "./pages/WorkoutPlanDetail";
 import Nutrition from "./pages/Nutrition";
 import NutritionNew from "./pages/NutritionNew";
 import NutritionPlanDetail from "./pages/NutritionPlanDetail";
-import ClientApp from "./pages/ClientApp";
 import NotFound from "./pages/NotFound";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CoachProfile from "./pages/CoachProfile";
-import WorkoutPlanView from "./components/client/WorkoutPlanView";
-import NutritionPlanView from "./components/client/NutritionPlanView";
 
 const queryClient = new QueryClient();
 
@@ -38,95 +35,78 @@ const App = () => (
           
           {/* Coach Routes - Protected */}
           <Route path="/dashboard" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <Dashboard />
             </ProtectedRoute>
           } />
           <Route path="/clients" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <Clients />
             </ProtectedRoute>
           } />
           <Route path="/clients/:id" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <ClientDetail />
             </ProtectedRoute>
           } />
           <Route path="/clients/new" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <ClientNew />
             </ProtectedRoute>
           } />
           <Route path="/workouts" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <Workouts />
             </ProtectedRoute>
           } />
           <Route path="/workouts/new" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <WorkoutNew />
             </ProtectedRoute>
           } />
           <Route path="/workouts/:id" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <WorkoutPlanDetail />
             </ProtectedRoute>
           } />
           <Route path="/workouts/edit/:id" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <WorkoutNew />
             </ProtectedRoute>
           } />
           <Route path="/nutrition" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <Nutrition />
             </ProtectedRoute>
           } />
           <Route path="/nutrition/new" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <NutritionNew />
             </ProtectedRoute>
           } />
           <Route path="/nutrition/:id" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <NutritionPlanDetail />
             </ProtectedRoute>
           } />
           <Route path="/profile" element={
-            <ProtectedRoute requiredRole="coach">
+            <ProtectedRoute>
               <Navbar />
               <CoachProfile />
             </ProtectedRoute>
           } />
 
-          {/* Client Routes */}
-          <Route path="/client-app" element={
-            <ProtectedRoute requiredRole="client">
-              <ClientApp />
-            </ProtectedRoute>
-          } />
-          <Route path="/client-app/workout/:planId" element={
-            <ProtectedRoute requiredRole="client">
-              <WorkoutPlanView />
-            </ProtectedRoute>
-          } />
-          <Route path="/client-app/nutrition/:planId" element={
-            <ProtectedRoute requiredRole="client">
-              <NutritionPlanView />
-            </ProtectedRoute>
-          } />
-          
           {/* Fallback routes */}
           <Route path="/logout" element={<Navigate to="/login" />} />
           <Route path="*" element={<NotFound />} />

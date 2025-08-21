@@ -42,7 +42,6 @@ export default function AuthForm() {
       
       const userData = {
         email: formState.email,
-        role: formState.role,
         isAuthenticated: true,
         lastActive: new Date().toISOString(),
       };
@@ -56,11 +55,7 @@ export default function AuthForm() {
       
       toast.success('Logged in successfully!');
       
-      if (formState.role === 'coach') {
-        navigate('/dashboard');
-      } else {
-        navigate('/client-app');
-      }
+      navigate('/dashboard');
     } catch (error) {
       toast.error('Authentication failed. Please try again.');
       console.error(error);

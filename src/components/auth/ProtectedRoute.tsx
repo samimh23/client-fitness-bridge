@@ -5,13 +5,11 @@ import { toast } from 'sonner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'coach' | 'client';
 }
 
-export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated in either localStorage or sessionStorage
@@ -25,7 +23,6 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
       try {
         const user = JSON.parse(userJson);
         setIsAuthenticated(user.isAuthenticated);
-        setUserRole(user.role);
       } catch (e) {
         setIsAuthenticated(false);
         localStorage.removeItem('user');
@@ -47,12 +44,6 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Role check
-  if (requiredRole && userRole !== requiredRole) {
-    toast.error(`This area is only accessible to ${requiredRole}s`);
-    return <Navigate to={userRole === 'client' ? '/client-app' : '/dashboard'} replace />;
-  }
-
-  // Authenticated and proper role - render children
+  // Authenticated - render children
   return <>{children}</>;
 }
