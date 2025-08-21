@@ -50,7 +50,7 @@ const Dashboard = () => {
             <p className="text-gray-500 mt-1">Overview of your coaching business</p>
           </div>
           <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
-            <Button asChild>
+            <Button asChild className="btn-primary">
               <Link to="/clients/new">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Add Client
@@ -59,56 +59,68 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="card-enhanced group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Clients
               </CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center group-hover:animate-bounce-soft">
+                <Users className="h-5 w-5 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockClients.length}</div>
+              <div className="text-3xl font-bold text-foreground">{mockClients.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Active coaching relationships</p>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="card-enhanced group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Workout Plans
               </CardTitle>
-              <Dumbbell className="h-4 w-4 text-muted-foreground" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center group-hover:animate-bounce-soft">
+                <Dumbbell className="h-5 w-5 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockWorkoutPlans.length}</div>
+              <div className="text-3xl font-bold text-foreground">{mockWorkoutPlans.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Training programs created</p>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="card-enhanced group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Nutrition Plans
               </CardTitle>
-              <Apple className="h-4 w-4 text-muted-foreground" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center group-hover:animate-bounce-soft">
+                <Apple className="h-5 w-5 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{mockNutritionPlans.length}</div>
+              <div className="text-3xl font-bold text-foreground">{mockNutritionPlans.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">Meal plans designed</p>
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="card-enhanced group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Active Plans
               </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center group-hover:animate-bounce-soft">
+                <Clock className="h-5 w-5 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-3xl font-bold text-foreground">
                 {mockClients.reduce((total, client) => 
                   total + client.workoutPlans.length + client.nutritionPlans.length, 0
                 )}
               </div>
+              <p className="text-xs text-muted-foreground mt-1">Currently assigned</p>
             </CardContent>
           </Card>
         </div>

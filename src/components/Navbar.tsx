@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound } from 'lucide-react';
+import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +56,8 @@ const Navbar = () => {
   
   const handleLogout = () => {
     localStorage.removeItem('user');
-    toast.success('Logged out successfully');
+    sessionStorage.removeItem('user');
+    toast.success('Successfully disconnected from CoachPro');
     navigate('/login');
   };
   
@@ -63,31 +72,34 @@ const Navbar = () => {
   return (
     <header 
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled ? 'bg-white/80 backdrop-blur-lg shadow-sm' : 'bg-transparent'
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+        scrolled ? 'bg-white/90 backdrop-blur-xl shadow-xl border-b border-border/50' : 'bg-gradient-to-r from-background/80 to-secondary/50 backdrop-blur-md'
       )}
     >
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-semibold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+            <Link to="/" className="flex items-center space-x-3 group">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+                <Dumbbell className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-xl font-bold gradient-text">
                 CoachPro
               </span>
             </Link>
           </div>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex md:space-x-4 md:items-center">
+          <nav className="hidden md:flex md:space-x-2 md:items-center">
             {navigationItems.map((item) => (
               <Link
                 key={item.name}
                 to={item.path}
                 className={cn(
-                  'inline-flex items-center text-sm font-medium transition-colors px-4 py-2 rounded-full',
+                  'nav-link inline-flex items-center text-sm font-medium',
                   location.pathname === item.path
-                    ? 'text-primary bg-primary/10'
-                    : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
+                    ? 'active'
+                    : 'text-foreground/70 hover:text-foreground hover:bg-secondary/50'
                 )}
               >
                 <item.icon className="w-4 h-4 mr-2" />
@@ -95,17 +107,49 @@ const Navbar = () => {
               </Link>
             ))}
             
-            {/* User info and logout */}
+            {/* Enhanced User Menu */}
             {userEmail && (
-              <div className="flex items-center ml-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="text-gray-500 hover:text-primary"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+              <div className="flex items-center ml-6">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className="relative h-10 w-10 rounded-full border-2 border-primary/20 hover:border-primary/40 transition-all duration-300"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="" alt={userName} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-white font-medium">
+                          {userName.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56 mr-4" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{userName}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {userEmail}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center">
+                        <UserRound className="mr-2 h-4 w-4" />
+                        <span>Profile Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={handleLogout}
+                      className="text-destructive hover:text-destructive focus:text-destructive cursor-pointer"
+                    >
+                      <Power className="mr-2 h-4 w-4" />
+                      <span>Disconnect</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             )}
           </nav>
@@ -130,20 +174,20 @@ const Navbar = () => {
       {/* Mobile Navigation Menu */}
       <div
         className={cn(
-          'md:hidden absolute top-16 inset-x-0 transition transform origin-top duration-300 ease-in-out bg-white shadow-md',
+          'md:hidden absolute top-16 inset-x-0 transition-all transform origin-top duration-500 ease-out bg-white/95 backdrop-blur-xl shadow-2xl border-b border-border/50',
           isOpen ? 'opacity-100 scale-y-100' : 'opacity-0 scale-y-95 pointer-events-none'
         )}
       >
-        <div className="px-2 pt-2 pb-4 space-y-1">
+        <div className="px-4 pt-4 pb-6 space-y-2">
           {navigationItems.map((item) => (
             <Link
               key={item.name}
               to={item.path}
               className={cn(
-                'block px-3 py-2 rounded-md text-base font-medium flex items-center',
+                'block px-4 py-3 rounded-xl text-base font-medium flex items-center transition-all duration-300',
                 location.pathname === item.path
-                  ? 'text-primary bg-primary/10'
-                  : 'text-foreground/70 hover:text-primary hover:bg-primary/5'
+                  ? 'text-white bg-gradient-to-r from-primary to-primary-glow shadow-lg'
+                  : 'text-foreground/70 hover:text-foreground hover:bg-secondary/50'
               )}
             >
               <item.icon className="w-5 h-5 mr-3" />
@@ -151,18 +195,27 @@ const Navbar = () => {
             </Link>
           ))}
           
-          {/* Mobile logout button */}
+          {/* Enhanced Mobile User Section */}
           {userEmail && (
-            <div className="mt-2 pt-2 border-t border-gray-200">
-              <div className="px-3 py-1 text-sm text-gray-500">
-                Logged in as: <span className="font-medium">{userEmail}</span>
+            <div className="mt-6 pt-4 border-t border-border/50">
+              <div className="flex items-center px-4 py-3 bg-secondary/30 rounded-xl mb-3">
+                <Avatar className="h-10 w-10 mr-3">
+                  <AvatarImage src="" alt={userName} />
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-primary-glow text-white font-medium">
+                    {userName.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{userName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+                </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center text-red-600 hover:bg-red-50"
+                className="flex items-center w-full px-4 py-3 rounded-xl text-base font-medium text-destructive hover:bg-destructive/10 transition-all duration-300"
               >
-                <LogOut className="w-5 h-5 mr-3" />
-                Logout
+                <Power className="w-5 h-5 mr-3" />
+                Disconnect
               </button>
             </div>
           )}
