@@ -8,6 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import PageTransition from '@/components/PageTransition';
 import AssignPlanDialog from '@/components/client/AssignPlanDialog';
+import ProgressPhotoComparison from '@/components/progress/ProgressPhotoComparison';
+import BodyMeasurementsChart from '@/components/progress/BodyMeasurementsChart';
+import WorkoutPerformanceAnalytics from '@/components/progress/WorkoutPerformanceAnalytics';
+import NutritionAdherenceMonitor from '@/components/progress/NutritionAdherenceMonitor';
 import { Client } from '@/lib/types';
 import { mockClients, mockWorkoutPlans, mockNutritionPlans } from '@/lib/data';
 
@@ -151,6 +155,7 @@ const ClientDetail = () => {
               <TabsList className="mb-4">
                 <TabsTrigger value="workout">Workout Plans</TabsTrigger>
                 <TabsTrigger value="nutrition">Nutrition Plans</TabsTrigger>
+                <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
               </TabsList>
               
               <TabsContent value="workout" className="space-y-4">
@@ -219,6 +224,30 @@ const ClientDetail = () => {
                 ) : (
                   <p className="text-center py-8 text-gray-500">No nutrition plans assigned yet.</p>
                 )}
+              </TabsContent>
+
+              <TabsContent value="progress" className="space-y-6">
+                <h2 className="text-xl font-semibold">Progress Tracking</h2>
+                
+                <ProgressPhotoComparison 
+                  photos={client.progressData?.photos || []}
+                  onAddPhoto={() => toast.info('Photo upload feature coming soon!')}
+                />
+                
+                <BodyMeasurementsChart 
+                  measurements={client.progressData?.measurements || []}
+                  onAddMeasurement={() => toast.info('Measurement entry feature coming soon!')}
+                />
+                
+                <WorkoutPerformanceAnalytics 
+                  performanceData={client.progressData?.workoutPerformance || []}
+                  onAddEntry={() => toast.info('Workout logging feature coming soon!')}
+                />
+                
+                <NutritionAdherenceMonitor 
+                  adherenceData={client.progressData?.nutritionAdherence || []}
+                  onAddEntry={() => toast.info('Nutrition logging feature coming soon!')}
+                />
               </TabsContent>
             </Tabs>
           </div>

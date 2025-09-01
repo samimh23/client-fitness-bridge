@@ -10,6 +10,68 @@ export interface Client {
   lastActive?: Date;
   goal?: string;
   notes?: string;
+  progressData?: ClientProgress;
+}
+
+export interface ClientProgress {
+  photos: ProgressPhoto[];
+  measurements: BodyMeasurement[];
+  workoutPerformance: WorkoutPerformanceEntry[];
+  nutritionAdherence: NutritionAdherenceEntry[];
+}
+
+export interface ProgressPhoto {
+  id: string;
+  imageUrl: string;
+  type: 'front' | 'side' | 'back';
+  date: Date;
+  notes?: string;
+}
+
+export interface BodyMeasurement {
+  id: string;
+  date: Date;
+  weight?: number;
+  bodyFat?: number;
+  muscleMass?: number;
+  measurements: {
+    chest?: number;
+    waist?: number;
+    hips?: number;
+    bicep?: number;
+    thigh?: number;
+    [key: string]: number | undefined;
+  };
+  notes?: string;
+}
+
+export interface WorkoutPerformanceEntry {
+  id: string;
+  date: Date;
+  workoutPlanId: string;
+  exerciseId: string;
+  exerciseName: string;
+  sets: {
+    reps: number;
+    weight?: number;
+    duration?: number;
+    restTime?: number;
+  }[];
+  notes?: string;
+  fatigue?: number; // 1-10 scale
+  difficulty?: number; // 1-10 scale
+}
+
+export interface NutritionAdherenceEntry {
+  id: string;
+  date: Date;
+  nutritionPlanId: string;
+  mealsCompleted: number;
+  totalMeals: number;
+  adherencePercentage: number;
+  caloriesConsumed?: number;
+  targetCalories?: number;
+  notes?: string;
 }
 
 export interface WorkoutPlan {
