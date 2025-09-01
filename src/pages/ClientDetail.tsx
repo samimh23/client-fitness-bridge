@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Dumbbell, Apple, Check } from 'lucide-react';
+import { ArrowLeft, Dumbbell, Apple, Check, X } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
@@ -57,6 +57,30 @@ const ClientDetail = () => {
     // Update client (in a real app, this would be an API call)
     setClient(updatedClient);
     toast.success('Nutrition plan assigned successfully');
+  };
+
+  const handleUnassignWorkoutPlan = (planId: string) => {
+    if (!client) return;
+    
+    const updatedClient = { 
+      ...client, 
+      workoutPlans: client.workoutPlans.filter(id => id !== planId) 
+    };
+    
+    setClient(updatedClient);
+    toast.success('Workout plan unassigned successfully');
+  };
+
+  const handleUnassignNutritionPlan = (planId: string) => {
+    if (!client) return;
+    
+    const updatedClient = { 
+      ...client, 
+      nutritionPlans: client.nutritionPlans.filter(id => id !== planId) 
+    };
+    
+    setClient(updatedClient);
+    toast.success('Nutrition plan unassigned successfully');
   };
   
   if (!client) {
@@ -174,14 +198,24 @@ const ClientDetail = () => {
                         <div className="h-2 bg-gradient-to-r from-green-500 to-emerald-700"></div>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
-                            <div>
+                            <div className="flex-1">
                               <div className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-1 bg-green-100 text-green-800">
                                 {plan.duration} week{plan.duration !== 1 ? 's' : ''}
                               </div>
                               <h3 className="font-semibold">{plan.name}</h3>
                               <p className="text-sm text-gray-500 line-clamp-1">{plan.description}</p>
                             </div>
-                            <Check className="h-5 w-5 text-green-500" />
+                            <div className="flex items-center gap-2">
+                              <Check className="h-5 w-5 text-green-500" />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnassignWorkoutPlan(plan.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
@@ -208,14 +242,24 @@ const ClientDetail = () => {
                         <div className="h-2 bg-gradient-to-r from-blue-500 to-indigo-700"></div>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
-                            <div>
+                            <div className="flex-1">
                               <div className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-1 bg-blue-100 text-blue-800">
                                 {plan.duration} week{plan.duration !== 1 ? 's' : ''}
                               </div>
                               <h3 className="font-semibold">{plan.name}</h3>
                               <p className="text-sm text-gray-500 line-clamp-1">{plan.description}</p>
                             </div>
-                            <Check className="h-5 w-5 text-blue-500" />
+                            <div className="flex items-center gap-2">
+                              <Check className="h-5 w-5 text-blue-500" />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleUnassignNutritionPlan(plan.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
