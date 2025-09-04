@@ -20,5 +20,5 @@ export interface SignupFormProps {
   formState: AuthFormState;
   updateFormState: (field: keyof AuthFormState, value: any) => void;
   isLoading: boolean;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, name: string) => void;
 }

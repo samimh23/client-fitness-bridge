@@ -5,6 +5,7 @@ import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 import { UserRole, AuthFormState } from './types';
+import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 
 const AUTO_LOGOUT_TIME = 5;
@@ -38,38 +39,42 @@ export default function AuthForm() {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userData = {
+      const response = await AuthService.login({
         email: formState.email,
-        isAuthenticated: true,
-        lastActive: new Date().toISOString(),
-      };
+        password: formState.password,
+      });
       
-      if (formState.rememberMe) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('user');
-      }
+      // Save JWT token and user data
+      AuthService.saveToken(response.access_token, formState.rememberMe);
+      AuthService.saveUser(response.user, formState.rememberMe);
       
       toast.success('Logged in successfully!');
       
-      navigate('/dashboard');
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
-      console.error(error);
+      // Navigate based on role
+      if (response.user.role === 'coach') {
+        navigate('/dashboard');
+      } else {
+        navigate('/client-app');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Authentication failed. Please try again.');
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSignupSubmit = async (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent, name: string) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await AuthService.signup({
+        name,
+        email: formState.email,
+        password: formState.password,
+        role: formState.role,
+      });
       
       toast.success('Account created successfully! You can now log in.');
       
@@ -79,9 +84,9 @@ export default function AuthForm() {
         ...prev,
         password: ''
       }));
-    } catch (error) {
-      toast.error('Account creation failed. Please try again.');
-      console.error(error);
+    } catch (error: any) {
+      toast.error(error.message || 'Account creation failed. Please try again.');
+      console.error('Signup error:', error);
     } finally {
       setIsLoading(false);
     }

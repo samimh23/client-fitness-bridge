@@ -79,7 +79,7 @@ export default function SignupForm({
     }
     
     // Otherwise submit normally
-    onSubmit(e);
+    onSubmit(e, name);
   };
 
   return (
