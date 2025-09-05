@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 
 interface ProtectedRouteProps {
@@ -12,25 +13,47 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated in either localStorage or sessionStorage
-    const localUserJson = localStorage.getItem('user');
-    const sessionUserJson = sessionStorage.getItem('user');
-    
-    // Use localStorage data first, then fallback to sessionStorage
-    const userJson = localUserJson || sessionUserJson;
-    
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        setIsAuthenticated(user.isAuthenticated);
-      } catch (e) {
+    const checkAuthentication = async () => {
+      const token = AuthService.getToken();
+      const user = AuthService.getUser();
+      
+      if (!token || !user) {
         setIsAuthenticated(false);
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('user');
+        return;
       }
-    } else {
-      setIsAuthenticated(false);
-    }
+      
+      // Check if token is expired
+      if (AuthService.isTokenExpired(token)) {
+        AuthService.logout();
+        setIsAuthenticated(false);
+        return;
+      }
+      
+      // Validate token with backend
+      const isValid = await AuthService.validateToken();
+      if (!isValid) {
+        AuthService.logout();
+        setIsAuthenticated(false);
+        return;
+      }
+      
+      // Check inactivity (24 hours)
+      if (user.lastActive) {
+        const lastActive = new Date(user.lastActive);
+        const now = new Date();
+        const hoursSinceLastActive = (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastActive > 24) {
+          AuthService.logout();
+          setIsAuthenticated(false);
+          return;
+        }
+      }
+      
+      setIsAuthenticated(true);
+    };
+    
+    checkAuthentication();
   }, []);
 
   // Show loading state while checking authentication

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -55,8 +56,7 @@ const Navbar = () => {
   }, []);
   
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('user');
+    AuthService.logout();
     toast.success('Successfully disconnected from CoachPro');
     navigate('/login');
   };
