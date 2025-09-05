@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Users, Dumbbell, Apple, Home, LogOut, UserRound, Power } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -41,22 +40,14 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
   
-  // Get user info
+  // Get user info - mock data for demo
   useEffect(() => {
-    const userJson = localStorage.getItem('user');
-    if (userJson) {
-      try {
-        const user = JSON.parse(userJson);
-        setUserEmail(user.email || 'Coach');
-        setUserName(user.name || 'Coach');
-      } catch (e) {
-        console.error('Error parsing user data', e);
-      }
-    }
+    setUserEmail('coach@example.com');
+    setUserName('Demo Coach');
   }, []);
   
   const handleLogout = () => {
-    AuthService.logout();
+    // Mock logout - just navigate to login
     toast.success('Successfully disconnected from CoachPro');
     navigate('/login');
   };
@@ -66,7 +57,7 @@ const Navbar = () => {
     { name: 'Clients', path: '/clients', icon: Users },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Nutrition', path: '/nutrition', icon: Apple },
-    { name: 'Profile', path: '/profile', icon: UserRound }, // Added Profile to main navigation
+    { name: 'Profile', path: '/profile', icon: UserRound },
   ];
   
   return (

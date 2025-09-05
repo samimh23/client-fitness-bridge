@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
-import { UserRole, AuthFormState } from './types';
-import { AuthService } from '@/lib/auth';
-import { toast } from 'sonner';
+import type { AuthFormState } from './types';
 
-const AUTO_LOGOUT_TIME = 5;
+const AUTO_LOGOUT_TIME = 30; // 30 minutes in minutes
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -37,59 +36,32 @@ export default function AuthForm() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    try {
-      const response = await AuthService.login({
-        email: formState.email,
-        password: formState.password,
-      });
-      
-      // Save JWT token and user data
-      AuthService.saveToken(response.access_token, formState.rememberMe);
-      AuthService.saveUser(response.user, formState.rememberMe);
-      
-      toast.success('Logged in successfully!');
-      
-      // Navigate based on role
-      if (response.user.role === 'coach') {
-        navigate('/dashboard');
-      } else {
-        navigate('/client-app');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Authentication failed. Please try again.');
-      console.error('Login error:', error);
-    } finally {
-      setIsLoading(false);
+
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    if (formState.email === 'coach@example.com' && formState.password === 'password') {
+      toast.success('Login successful!');
+      navigate('/dashboard');
+    } else if (formState.email === 'client@example.com' && formState.password === 'password') {
+      toast.success('Login successful!');
+      navigate('/client-app');
+    } else {
+      toast.error('Invalid credentials. Try coach@example.com or client@example.com with password "password"');
     }
+    setIsLoading(false);
   };
 
   const handleSignupSubmit = async (e: React.FormEvent, name: string) => {
     e.preventDefault();
     setIsLoading(true);
+
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    try {
-      await AuthService.signup({
-        name,
-        email: formState.email,
-        password: formState.password,
-        role: formState.role,
-      });
-      
-      toast.success('Account created successfully! You can now log in.');
-      
-      setActiveTab('login');
-      
-      setFormState(prev => ({
-        ...prev,
-        password: ''
-      }));
-    } catch (error: any) {
-      toast.error(error.message || 'Account creation failed. Please try again.');
-      console.error('Signup error:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    toast.success('Account created successfully! Please log in.');
+    setActiveTab('login');
+    setIsLoading(false);
   };
 
   useEffect(() => {
