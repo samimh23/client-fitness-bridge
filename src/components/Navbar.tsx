@@ -40,14 +40,23 @@ const Navbar = () => {
     setIsOpen(false);
   }, [location.pathname]);
   
-  // Get user info - mock data for demo
+  // Get user info
   useEffect(() => {
-    setUserEmail('coach@example.com');
-    setUserName('Demo Coach');
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        setUserEmail(user.email || 'Coach');
+        setUserName(user.name || 'Coach');
+      } catch (e) {
+        console.error('Error parsing user data', e);
+      }
+    }
   }, []);
   
   const handleLogout = () => {
-    // Mock logout - just navigate to login
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
     toast.success('Successfully disconnected from CoachPro');
     navigate('/login');
   };
@@ -57,7 +66,7 @@ const Navbar = () => {
     { name: 'Clients', path: '/clients', icon: Users },
     { name: 'Workouts', path: '/workouts', icon: Dumbbell },
     { name: 'Nutrition', path: '/nutrition', icon: Apple },
-    { name: 'Profile', path: '/profile', icon: UserRound },
+    { name: 'Profile', path: '/profile', icon: UserRound }, // Added Profile to main navigation
   ];
   
   return (

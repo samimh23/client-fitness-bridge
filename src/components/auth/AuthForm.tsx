@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from 'sonner';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
-import type { AuthFormState } from './types';
+import { UserRole, AuthFormState } from './types';
+import { toast } from 'sonner';
 
-const AUTO_LOGOUT_TIME = 30; // 30 minutes in minutes
+const AUTO_LOGOUT_TIME = 5;
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -36,32 +36,55 @@ export default function AuthForm() {
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (formState.email === 'coach@example.com' && formState.password === 'password') {
-      toast.success('Login successful!');
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const userData = {
+        email: formState.email,
+        isAuthenticated: true,
+        lastActive: new Date().toISOString(),
+      };
+      
+      if (formState.rememberMe) {
+        localStorage.setItem('user', JSON.stringify(userData));
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(userData));
+        localStorage.removeItem('user');
+      }
+      
+      toast.success('Logged in successfully!');
+      
       navigate('/dashboard');
-    } else if (formState.email === 'client@example.com' && formState.password === 'password') {
-      toast.success('Login successful!');
-      navigate('/client-app');
-    } else {
-      toast.error('Invalid credentials. Try coach@example.com or client@example.com with password "password"');
+    } catch (error) {
+      toast.error('Authentication failed. Please try again.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
-  const handleSignupSubmit = async (e: React.FormEvent, name: string) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    toast.success('Account created successfully! Please log in.');
-    setActiveTab('login');
-    setIsLoading(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      toast.success('Account created successfully! You can now log in.');
+      
+      setActiveTab('login');
+      
+      setFormState(prev => ({
+        ...prev,
+        password: ''
+      }));
+    } catch (error) {
+      toast.error('Account creation failed. Please try again.');
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
