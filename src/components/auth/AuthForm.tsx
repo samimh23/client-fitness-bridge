@@ -5,6 +5,7 @@ import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 import { UserRole, AuthFormState } from './types';
+import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 
 const AUTO_LOGOUT_TIME = 5;
@@ -20,7 +21,9 @@ export default function AuthForm() {
   const [formState, setFormState] = useState<AuthFormState>({
     email: '',
     password: '',
-    role: 'coach',
+    firstName: '',
+    lastName: '',
+    role: 'COACH',
     rememberMe: false,
   });
 
@@ -29,36 +32,34 @@ export default function AuthForm() {
       ...prev,
       [field]: value
     }));
-    
     setLastActivity(Date.now());
   };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const userData = {
+      const response = await AuthService.login({
         email: formState.email,
-        isAuthenticated: true,
-        lastActive: new Date().toISOString(),
-      };
-      
-      if (formState.rememberMe) {
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        sessionStorage.setItem('user', JSON.stringify(userData));
-        localStorage.removeItem('user');
-      }
-      
+        password: formState.password,
+      });
+
+      // Save JWT token and user data
+      AuthService.saveToken(response.accessToken, formState.rememberMe);
+      AuthService.saveUser(response.user, formState.rememberMe);
+
       toast.success('Logged in successfully!');
-      
-      navigate('/dashboard');
-    } catch (error) {
-      toast.error('Authentication failed. Please try again.');
-      console.error(error);
+
+      // Navigate based on role
+      if (response.user.role === 'COACH') {
+        navigate('/dashboard');
+      } else {
+        navigate('/client-app');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Authentication failed. Please try again.');
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -67,21 +68,27 @@ export default function AuthForm() {
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await AuthService.signup({
+        firstName: formState.firstName,
+        lastName: formState.lastName,
+        email: formState.email,
+        password: formState.password,
+        role: formState.role,
+      });
+
       toast.success('Account created successfully! You can now log in.');
-      
+
       setActiveTab('login');
-      
+
       setFormState(prev => ({
         ...prev,
         password: ''
       }));
-    } catch (error) {
-      toast.error('Account creation failed. Please try again.');
-      console.error(error);
+    } catch (error: any) {
+      toast.error(error.message || 'Account creation failed. Please try again.');
+      console.error('Signup error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -92,43 +99,43 @@ export default function AuthForm() {
       if (inactivityTimer) {
         clearTimeout(inactivityTimer);
       }
-      
+
       const timer = setTimeout(() => {
         const localUserJson = localStorage.getItem('user');
         const sessionUserJson = sessionStorage.getItem('user');
-        
+
         if (localUserJson || sessionUserJson) {
           const inactiveTimeMs = Date.now() - lastActivity;
           const inactiveTimeMinutes = inactiveTimeMs / (1000 * 60);
-          
+
           if (inactiveTimeMinutes >= AUTO_LOGOUT_TIME) {
             localStorage.removeItem('user');
             sessionStorage.removeItem('user');
-            
+
             toast.info(`You've been logged out due to inactivity.`);
-            
+
             if (window.location.pathname !== '/login') {
               window.location.href = '/login';
             }
           }
         }
-        
+
         setupInactivityTimer();
       }, 60000);
-      
+
       setInactivityTimer(timer);
     };
-    
+
     setupInactivityTimer();
-    
+
     const handleActivity = () => {
       setLastActivity(Date.now());
     };
-    
+
     window.addEventListener('mousemove', handleActivity);
     window.addEventListener('keydown', handleActivity);
     window.addEventListener('click', handleActivity);
-    
+
     return () => {
       if (inactivityTimer) {
         clearTimeout(inactivityTimer);
@@ -153,7 +160,7 @@ export default function AuthForm() {
         </TabsList>
 
         <TabsContent value="login" className="space-y-4 pt-4">
-          <LoginForm 
+          <LoginForm
             formState={formState}
             updateFormState={updateFormState}
             isLoading={isLoading}
@@ -163,7 +170,7 @@ export default function AuthForm() {
         </TabsContent>
 
         <TabsContent value="signup" className="space-y-4 pt-4">
-          <SignupForm 
+          <SignupForm
             formState={formState}
             updateFormState={updateFormState}
             isLoading={isLoading}
@@ -172,9 +179,9 @@ export default function AuthForm() {
         </TabsContent>
       </Tabs>
 
-      <ForgotPasswordDialog 
-        open={forgotPasswordOpen} 
-        onOpenChange={setForgotPasswordOpen} 
+      <ForgotPasswordDialog
+        open={forgotPasswordOpen}
+        onOpenChange={setForgotPasswordOpen}
       />
     </div>
   );

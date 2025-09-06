@@ -14,18 +14,22 @@ export default function SignupForm({
   isLoading,
   onSubmit
 }: SignupFormProps) {
-  const [name, setName] = useState('');
   const [validationErrors, setValidationErrors] = useState<{
-    name?: string;
+    firstName?: string;
+    lastName?: string;
     email?: string;
     password?: string;
   }>({});
-  
+
   // Handle form validation
   const validateField = (field: string, value: string) => {
-    if (field === 'name') {
+    if (field === 'firstName') {
       if (!value) {
-        return 'Name is required';
+        return 'First name is required';
+      }
+    } else if (field === 'lastName') {
+      if (!value) {
+        return 'Last name is required';
       }
     } else if (field === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -44,40 +48,41 @@ export default function SignupForm({
     return '';
   };
 
-  const handleInputChange = (field: 'name' | 'email' | 'password', value: string) => {
-    if (field === 'name') {
-      setName(value);
-    } else {
-      updateFormState(field as any, value);
-    }
-    
+  const handleInputChange = (
+    field: 'firstName' | 'lastName' | 'email' | 'password' | 'role',
+    value: string
+  ) => {
+    updateFormState(field, value);
+
     // Validate on change
     const error = validateField(field, value);
-    setValidationErrors(prev => ({
+    setValidationErrors((prev) => ({
       ...prev,
       [field]: error
     }));
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate all fields before submission
-    const nameError = validateField('name', name);
+    const firstNameError = validateField('firstName', formState.firstName);
+    const lastNameError = validateField('lastName', formState.lastName);
     const emailError = validateField('email', formState.email);
     const passwordError = validateField('password', formState.password);
-    
+
     setValidationErrors({
-      name: nameError,
+      firstName: firstNameError,
+      lastName: lastNameError,
       email: emailError,
       password: passwordError
     });
-    
+
     // If there are validation errors, don't submit
-    if (nameError || emailError || passwordError) {
+    if (firstNameError || lastNameError || emailError || passwordError) {
       return;
     }
-    
+
     // Otherwise submit normally
     onSubmit(e);
   };
@@ -85,39 +90,63 @@ export default function SignupForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="name">Full Name</Label>
+        <Label htmlFor="firstName">First Name</Label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <User className="h-4 w-4 text-gray-400" />
           </div>
-          <Input 
-            id="name" 
-            type="text" 
-            placeholder="John Doe" 
-            value={name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
+          <Input
+            id="firstName"
+            type="text"
+            placeholder="John"
+            value={formState.firstName}
+            onChange={(e) => handleInputChange('firstName', e.target.value)}
             required
             className="pl-10"
           />
         </div>
-        {validationErrors.name && (
+        {validationErrors.firstName && (
           <p className="text-sm text-red-500 flex items-center mt-1">
             <AlertCircle className="h-3 w-3 mr-1" />
-            {validationErrors.name}
+            {validationErrors.firstName}
           </p>
         )}
       </div>
-      
+
+      <div className="space-y-2">
+        <Label htmlFor="lastName">Last Name</Label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <User className="h-4 w-4 text-gray-400" />
+          </div>
+          <Input
+            id="lastName"
+            type="text"
+            placeholder="Doe"
+            value={formState.lastName}
+            onChange={(e) => handleInputChange('lastName', e.target.value)}
+            required
+            className="pl-10"
+          />
+        </div>
+        {validationErrors.lastName && (
+          <p className="text-sm text-red-500 flex items-center mt-1">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            {validationErrors.lastName}
+          </p>
+        )}
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="signup-email">Email</Label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Mail className="h-4 w-4 text-gray-400" />
           </div>
-          <Input 
-            id="signup-email" 
-            type="email" 
-            placeholder="coach@example.com" 
+          <Input
+            id="signup-email"
+            type="email"
+            placeholder="coach@example.com"
             value={formState.email}
             onChange={(e) => handleInputChange('email', e.target.value)}
             required
@@ -131,10 +160,10 @@ export default function SignupForm({
           </p>
         )}
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="signup-password">Password</Label>
-        <PasswordInput 
+        <PasswordInput
           id="signup-password"
           value={formState.password}
           onChange={(value) => handleInputChange('password', value)}
@@ -147,40 +176,40 @@ export default function SignupForm({
           </p>
         )}
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="role">I am a:</Label>
         <div className="flex gap-4">
           <div className="flex items-center space-x-2">
-            <input 
-              type="radio" 
-              id="signup-coach-role" 
-              name="role" 
-              value="coach"
-              checked={formState.role === 'coach'}
-              onChange={() => updateFormState('role', 'coach')}
+            <input
+              type="radio"
+              id="signup-coach-role"
+              name="role"
+              value="COACH"
+              checked={formState.role === 'COACH'}
+              onChange={() => updateFormState('role', 'COACH')}
               className="h-4 w-4 text-primary"
             />
             <Label htmlFor="signup-coach-role" className="cursor-pointer">Coach</Label>
           </div>
           <div className="flex items-center space-x-2">
-            <input 
-              type="radio" 
-              id="signup-client-role" 
-              name="role" 
-              value="client"
-              checked={formState.role === 'client'}
-              onChange={() => updateFormState('role', 'client')}
+            <input
+              type="radio"
+              id="signup-client-role"
+              name="role"
+              value="CLIENT"
+              checked={formState.role === 'CLIENT'}
+              onChange={() => updateFormState('role', 'CLIENT')}
               className="h-4 w-4 text-primary"
             />
             <Label htmlFor="signup-client-role" className="cursor-pointer">Client</Label>
           </div>
         </div>
       </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full" 
+
+      <Button
+        type="submit"
+        className="w-full"
         disabled={isLoading}
       >
         {isLoading ? (
@@ -198,7 +227,7 @@ export default function SignupForm({
           </span>
         )}
       </Button>
-      
+
       <SocialLoginButtons />
     </form>
   );
