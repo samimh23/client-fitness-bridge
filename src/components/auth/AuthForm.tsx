@@ -8,7 +8,7 @@ import { UserRole, AuthFormState } from './types';
 import { AuthService } from '@/lib/auth';
 import { toast } from 'sonner';
 
-const AUTO_LOGOUT_TIME = 5;
+const AUTO_LOGOUT_TIME = 30;
 
 export default function AuthForm() {
   const navigate = useNavigate();
@@ -100,7 +100,7 @@ export default function AuthForm() {
         clearTimeout(inactivityTimer);
       }
 
-      const timer = setTimeout(() => {
+      const timer = setTimeout(async () => {
         const localUserJson = localStorage.getItem('user');
         const sessionUserJson = sessionStorage.getItem('user');
 
@@ -109,8 +109,8 @@ export default function AuthForm() {
           const inactiveTimeMinutes = inactiveTimeMs / (1000 * 60);
 
           if (inactiveTimeMinutes >= AUTO_LOGOUT_TIME) {
-            localStorage.removeItem('user');
-            sessionStorage.removeItem('user');
+            await AuthService.logout();
+           
 
             toast.info(`You've been logged out due to inactivity.`);
 

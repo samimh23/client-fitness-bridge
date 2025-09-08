@@ -1,7 +1,6 @@
 import { AuthResponse, AuthUser, LoginCredentials, SignupCredentials } from '@/components/auth/types';
 
-
-const API_BASE_URL = 'http://localhost:3000'; // Replace with your backend URL
+const API_BASE_URL = 'http://localhost:3001'; // Replace with your backend URL
 
 export class AuthService {
   private static getAuthHeaders() {
@@ -18,6 +17,7 @@ export class AuthService {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // ADD THIS - crucial for receiving cookies
       body: JSON.stringify(credentials),
     });
 
@@ -35,6 +35,7 @@ export class AuthService {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include', // ADD THIS - for consistency
       body: JSON.stringify(credentials),
     });
 
@@ -53,11 +54,35 @@ export class AuthService {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         headers: this.getAuthHeaders(),
+        credentials: 'include', // ADD THIS - for sending cookies
       });
       return response.ok;
     } catch (error) {
       console.error('Token validation failed:', error);
       return false;
+    }
+  }
+
+  // Add a method to refresh tokens using the cookie
+  static async refreshToken(): Promise<string | null> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // This will send the refresh token cookie
+      });
+
+      if (!response.ok) {
+        throw new Error('Token refresh failed');
+      }
+
+      const data = await response.json();
+      return data.accessToken;
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      return null;
     }
   }
 
@@ -106,11 +131,31 @@ export class AuthService {
     }
   }
 
-  static logout(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('auth_token');
-    sessionStorage.removeItem('user');
+  static async logout(): Promise<void> {
+    const token = this.getToken();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
+        credentials: 'include', // This is correct - sends the refresh token cookie
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
+    } catch (err) {
+      console.error('Logout API call failed:', err);
+    } finally {
+      // Always clear storage
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('auth_token');
+      sessionStorage.removeItem('user');
+    }
   }
 
   static isTokenExpired(token: string): boolean {
@@ -121,5 +166,27 @@ export class AuthService {
     } catch (error) {
       return true;
     }
+  }
+
+  // Helper method to check if user needs to refresh token
+  static async ensureValidToken(): Promise<string | null> {
+    const currentToken = this.getToken();
+    
+    if (!currentToken) {
+      // Try to refresh using cookie
+      return await this.refreshToken();
+    }
+    
+    if (this.isTokenExpired(currentToken)) {
+      // Token expired, try to refresh
+      const newToken = await this.refreshToken();
+      if (newToken) {
+        this.saveToken(newToken, !!localStorage.getItem('auth_token'));
+        return newToken;
+      }
+      return null;
+    }
+    
+    return currentToken;
   }
 }
