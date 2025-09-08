@@ -1,73 +1,118 @@
-import { AuthResponse, AuthUser, LoginCredentials, SignupCredentials } from '@/components/auth/types';
+// Simple mock authentication service
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
 
+export interface SignupCredentials {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role: 'COACH' | 'CLIENT' | 'ADMIN';
+}
 
-const API_BASE_URL = 'http://localhost:3000'; // Replace with your backend URL
+export interface AuthUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'COACH' | 'CLIENT' | 'ADMIN';
+  lastActive?: string;
+}
+
+export interface AuthResponse {
+  user: AuthUser;
+  accessToken: string;
+}
+
+// Mock users database
+const mockUsers: AuthUser[] = [
+  {
+    id: '1',
+    email: 'coach@example.com',
+    firstName: 'John',
+    lastName: 'Coach',  
+    role: 'COACH'
+  },
+  {
+    id: '2',
+    email: 'client@example.com', 
+    firstName: 'Jane',
+    lastName: 'Client',
+    role: 'CLIENT'
+  },
+  {
+    id: '3',
+    email: 'admin@example.com',
+    firstName: 'Admin',
+    lastName: 'User',
+    role: 'ADMIN'
+  }
+];
 
 export class AuthService {
-  private static getAuthHeaders() {
-    const token = this.getToken();
+  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Find user by email
+    const user = mockUsers.find(u => u.email === credentials.email);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    // For demo purposes, accept any password except 'wrong'
+    if (credentials.password === 'wrong') {
+      throw new Error('Invalid password');
+    }
+    
+    // Generate mock JWT token
+    const token = `mock-jwt-token-${user.id}-${Date.now()}`;
+    
     return {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      user: {
+        ...user,
+        lastActive: new Date().toISOString()
+      },
+      accessToken: token
     };
   }
 
-  static async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
+  static async signup(credentials: SignupCredentials): Promise<void> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // Check if user already exists
+    const existingUser = mockUsers.find(u => u.email === credentials.email);
+    if (existingUser) {
+      throw new Error('User already exists');
     }
-
-    return response.json();
-  }
-
-  static async signup(credentials: SignupCredentials): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(credentials),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Signup failed');
-    }
-
-    return response.json();
+    
+    // Add new user to mock database
+    const newUser: AuthUser = {
+      id: `user-${Date.now()}`,
+      email: credentials.email,
+      firstName: credentials.firstName,
+      lastName: credentials.lastName,
+      role: credentials.role
+    };
+    
+    mockUsers.push(newUser);
   }
 
   static async validateToken(): Promise<boolean> {
+    // For mock purposes, always return true if token exists
     const token = this.getToken();
-    if (!token) return false;
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-        headers: this.getAuthHeaders(),
-      });
-      return response.ok;
-    } catch (error) {
-      console.error('Token validation failed:', error);
-      return false;
-    }
+    return !!token;
   }
 
-  static saveToken(token: string, rememberMe: boolean = false): void {
+  static saveToken(token: string, rememberMe = false): void {
     if (rememberMe) {
       localStorage.setItem('auth_token', token);
-      sessionStorage.removeItem('auth_token');
     } else {
       sessionStorage.setItem('auth_token', token);
-      localStorage.removeItem('auth_token');
     }
   }
 
@@ -75,35 +120,18 @@ export class AuthService {
     return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
   }
 
-  static saveUser(user: AuthUser, rememberMe: boolean = false): void {
-    const userData = {
-      ...user,
-      isAuthenticated: true,
-      lastActive: new Date().toISOString(),
-    };
-
+  static saveUser(user: AuthUser, rememberMe = false): void {
+    const userData = JSON.stringify(user);
     if (rememberMe) {
-      localStorage.setItem('user', JSON.stringify(userData));
-      sessionStorage.removeItem('user');
+      localStorage.setItem('user', userData);
     } else {
-      sessionStorage.setItem('user', JSON.stringify(userData));
-      localStorage.removeItem('user');
+      sessionStorage.setItem('user', userData);
     }
   }
 
   static getUser(): AuthUser | null {
-    const localUserJson = localStorage.getItem('user');
-    const sessionUserJson = sessionStorage.getItem('user');
-    const userJson = localUserJson || sessionUserJson;
-
-    if (!userJson) return null;
-
-    try {
-      return JSON.parse(userJson) as AuthUser;
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      return null;
-    }
+    const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
   }
 
   static logout(): void {
@@ -114,12 +142,7 @@ export class AuthService {
   }
 
   static isTokenExpired(token: string): boolean {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      return payload.exp < currentTime;
-    } catch (error) {
-      return true;
-    }
+    // For mock purposes, tokens never expire
+    return false;
   }
 }
