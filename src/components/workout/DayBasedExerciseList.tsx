@@ -125,31 +125,32 @@ const DayBasedExerciseList = ({
         <Tabs value={activeDay} onValueChange={setActiveDay} className="w-full">
           <div className="border-b bg-muted/30">
             <ScrollArea className="w-full whitespace-nowrap">
-              <TabsList className="inline-flex h-12 items-center justify-start rounded-none bg-transparent p-0 px-4">
-                {activeDays.map(day => {
-                  const dayExercises = exercisesByDay[day] || [];
-                  const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day - 1] || `Day ${day}`;
-                  
-                  return (
-                    <TabsTrigger
-                      key={day}
-                      value={day.toString()}
-                      className="relative h-10 rounded-lg px-4 py-2 text-sm font-medium transition-all data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span>{dayName}</span>
-                        {dayExercises.length > 0 && (
-                          <Badge 
-                            variant="secondary" 
-                            className="h-5 text-xs bg-background/80 text-foreground"
-                          >
-                            {dayExercises.length}
-                          </Badge>
-                        )}
-                      </div>
-                    </TabsTrigger>
-                  );
-                })}
+              <TabsList className="inline-flex h-16 items-center justify-start rounded-none bg-transparent p-0 px-6 gap-2">
+                 {activeDays.map(day => {
+                   const dayExercises = exercisesByDay[day] || [];
+                   
+                   return (
+                     <TabsTrigger
+                       key={day}
+                       value={day.toString()}
+                       className="relative h-12 rounded-xl px-6 py-3 text-sm font-medium transition-all hover:bg-primary/5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary-glow data-[state=active]:text-white data-[state=active]:shadow-lg hover-scale"
+                     >
+                       <div className="flex items-center gap-3">
+                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 data-[state=active]:bg-white/20">
+                           <span className="text-xs font-semibold">{day}</span>
+                         </div>
+                         <div className="text-left">
+                           <div className="font-semibold">Day {day}</div>
+                           {dayExercises.length > 0 && (
+                             <div className="text-xs opacity-75">
+                               {dayExercises.length} exercise{dayExercises.length !== 1 ? 's' : ''}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                     </TabsTrigger>
+                   );
+                 })}
               </TabsList>
             </ScrollArea>
           </div>

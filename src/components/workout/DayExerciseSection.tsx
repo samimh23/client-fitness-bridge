@@ -30,32 +30,39 @@ const DayExerciseSection = ({
   onCopyDay,
   allExercises
 }: DayExerciseSectionProps) => {
-  const dayName = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day - 1] || `Day ${day}`;
   
   const getExerciseColor = (index: number) => {
-    const colors = ['bg-blue-50 border-blue-200', 'bg-green-50 border-green-200', 'bg-purple-50 border-purple-200', 'bg-orange-50 border-orange-200'];
+    const colors = [
+      'bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20', 
+      'bg-gradient-to-br from-secondary/50 to-secondary/70 border-secondary/30', 
+      'bg-gradient-to-br from-accent/50 to-accent/70 border-accent/30',
+      'bg-gradient-to-br from-muted/50 to-muted/70 border-muted/30'
+    ];
     return colors[index % colors.length];
   };
 
   return (
-    <Card className="card-enhanced overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary-glow/5 border-b">
+    <Card className="glass-card overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-primary-glow/10 border-b border-primary/20">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-full bg-primary/10">
-              <Calendar className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-glow shadow-lg">
+              <span className="text-xl font-bold text-white">{day}</span>
             </div>
             <div>
-              <CardTitle className="text-xl gradient-text">
-                {dayName}
+              <CardTitle className="text-2xl gradient-text">
+                Day {day}
               </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Day {day} of your workout plan
+                Training session for day {day}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-primary/10 text-primary">
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="secondary" 
+              className="bg-gradient-to-r from-primary/10 to-primary-glow/10 text-primary border border-primary/20 shadow-sm"
+            >
               {exercises.length} {exercises.length === 1 ? 'Exercise' : 'Exercises'}
             </Badge>
             {onCopyDay && exercises.length > 0 && (
@@ -64,9 +71,9 @@ const DayExerciseSection = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onCopyDay(day)}
-                className="text-muted-foreground hover:text-primary"
+                className="text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all duration-300"
               >
-                <Copy className="h-4 w-4 mr-1" />
+                <Copy className="h-4 w-4 mr-2" />
                 Copy Day
               </Button>
             )}
@@ -74,36 +81,37 @@ const DayExerciseSection = ({
         </div>
       </CardHeader>
       
-      <CardContent className="p-6">
-        <div className="flex gap-2 mb-6">
+      <CardContent className="p-8">
+        <div className="flex gap-3 mb-8">
           <Button 
             type="button" 
             onClick={() => onAddFromLibrary(day)} 
-            variant="default"
-            className="btn-primary"
+            className="btn-primary flex-1 h-12 text-base font-medium"
           >
-            <Dumbbell className="mr-2 h-4 w-4" />
+            <Dumbbell className="mr-3 h-5 w-5" />
             Add from Library
           </Button>
           <Button 
             type="button" 
             onClick={() => onAddExercise(day)} 
             variant="outline"
-            className="hover:bg-primary/5 hover:border-primary/30"
+            className="flex-1 h-12 text-base font-medium border-2 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-3 h-5 w-5" />
             Add Manually
           </Button>
         </div>
 
         {exercises.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Dumbbell className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium mb-2">No exercises added yet</p>
-            <p className="text-sm">Add your first exercise to get started</p>
+          <div className="text-center py-16 text-muted-foreground">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-gradient-to-br from-primary/10 to-primary-glow/10 flex items-center justify-center">
+              <Dumbbell className="h-10 w-10 text-primary/50" />
+            </div>
+            <p className="text-xl font-semibold mb-3 text-foreground/80">No exercises added yet</p>
+            <p className="text-base">Start building your workout for Day {day}</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {exercises.map((exercise, exerciseIndex) => {
               // Find the global index in allExercises array
               const globalIndex = allExercises.findIndex(ex => 
@@ -112,8 +120,8 @@ const DayExerciseSection = ({
               
               return (
                 <React.Fragment key={globalIndex}>
-                  {exerciseIndex > 0 && <Separator className="my-6" />}
-                  <div className={`rounded-xl p-1 ${getExerciseColor(exerciseIndex)}`}>
+                  {exerciseIndex > 0 && <Separator className="my-8 bg-gradient-to-r from-transparent via-border to-transparent" />}
+                  <div className={`rounded-2xl p-4 border-2 transition-all duration-300 hover:shadow-lg ${getExerciseColor(exerciseIndex)}`}>
                     <ExerciseForm
                       exercise={exercise}
                       index={globalIndex}
