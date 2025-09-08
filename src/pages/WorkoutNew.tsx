@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
-import ExerciseList from '@/components/workout/ExerciseList';
+import DayBasedExerciseList from '@/components/workout/DayBasedExerciseList';
 import PlanOverviewCard from '@/components/workout/PlanOverviewCard';
 import WorkoutTypeSelector, { WORKOUT_PLAN_TYPES } from '@/components/workout/WorkoutTypeSelector';
 import WorkoutFormHeader from '@/components/workout/WorkoutFormHeader';
@@ -70,10 +70,10 @@ const WorkoutNew = () => {
     setExercises(updatedExercises);
   };
 
-  const addExercise = () => {
+  const addExercise = (day: number = 1) => {
     setExercises([
       ...exercises,
-      { name: '', sets: 3, reps: 10, day: 1 }
+      { name: '', sets: 3, reps: 10, day }
     ]);
   };
 
@@ -97,10 +97,10 @@ const WorkoutNew = () => {
     setActiveExerciseIndex(null);
   };
 
-  const handleAddFromLibrary = () => {
+  const handleAddFromLibrary = (day: number = 1) => {
     setActiveExerciseIndex(exercises.length);
     setIsLibraryOpen(true);
-    addExercise();
+    addExercise(day);
   };
 
   const handleSelectExercise = (exerciseWithVideo: ExerciseWithVideo) => {
@@ -198,7 +198,7 @@ const WorkoutNew = () => {
                 </TabsContent>
                 
                 <TabsContent value="exercises" className="mt-0">
-                  <ExerciseList
+                  <DayBasedExerciseList
                     exercises={exercises}
                     onAddExercise={addExercise}
                     onRemoveExercise={removeExercise}
