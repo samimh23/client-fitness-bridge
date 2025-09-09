@@ -8,12 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
-import ExerciseList from '@/components/workout/ExerciseList';
-import PlanOverviewCard from '@/components/workout/PlanOverviewCard';
 import WorkoutTypeSelector, { WORKOUT_PLAN_TYPES } from '@/components/workout/WorkoutTypeSelector';
 import WorkoutFormHeader from '@/components/workout/WorkoutFormHeader';
 import TrainingTipsDrawer from '@/components/workout/TrainingTipsDrawer';
 import PlanSummaryCard from '@/components/workout/PlanSummaryCard';
+import DayBasedExerciseList from '@/components/workout/DayBasedExerciseList';
 
 const WorkoutNew = () => {
   const navigate = useNavigate();
@@ -70,10 +69,10 @@ const WorkoutNew = () => {
     setExercises(updatedExercises);
   };
 
-  const addExercise = () => {
+  const addExercise = (day: number = 1) => {
     setExercises([
       ...exercises,
-      { name: '', sets: 3, reps: 10, day: 1 }
+      { name: '', sets: 3, reps: 10, day }
     ]);
   };
 
@@ -97,10 +96,10 @@ const WorkoutNew = () => {
     setActiveExerciseIndex(null);
   };
 
-  const handleAddFromLibrary = () => {
+  const handleAddFromLibrary = (day: number = 1) => {
     setActiveExerciseIndex(exercises.length);
     setIsLibraryOpen(true);
-    addExercise();
+    addExercise(day);
   };
 
   const handleSelectExercise = (exerciseWithVideo: ExerciseWithVideo) => {
@@ -158,71 +157,65 @@ const WorkoutNew = () => {
 
   return (
     <PageTransition>
-      <div className="container mx-auto px-4 pt-24 pb-16 bg-gradient-to-br from-blue-50 via-indigo-50 to-white">
-        <WorkoutFormHeader 
-          onBackClick={() => navigate('/workouts')}
-          onOpenTips={() => setIsProTipsOpen(true)}
-        />
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6 bg-gradient-to-r from-blue-100 to-indigo-200 rounded-xl p-1">
-                <TabsTrigger 
-                  value="details" 
-                  className={`text-sm rounded-lg ${activeTab === 'details' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-900'}`}
-                >
-                  Plan Details
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="exercises" 
-                  className={`text-sm rounded-lg ${activeTab === 'exercises' ? 'bg-white text-blue-700 shadow-sm' : 'text-blue-900'}`}
-                >
-                  Exercises
-                </TabsTrigger>
-              </TabsList>
-              
-              <form id="workout-form" onSubmit={handleSubmit}>
-                <TabsContent value="details" className="mt-0 space-y-6">
-                  <PlanDetailsForm
-                    name={planData.name}
-                    description={planData.description}
-                    duration={planData.duration}
-                    onChange={handlePlanChange}
-                  />
-                  
-                  <WorkoutTypeSelector 
-                    selectedType={planData.type} 
-                    onTypeChange={handleTypeChange}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="exercises" className="mt-0">
-                  <ExerciseList
-                    exercises={exercises}
-                    onAddExercise={addExercise}
-                    onRemoveExercise={removeExercise}
-                    onExerciseChange={handleExerciseChange}
-                    onOpenLibrary={openLibrary}
-                    onAddFromLibrary={handleAddFromLibrary}
-                  />
-                </TabsContent>
-              </form>
-            </Tabs>
-          </div>
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <WorkoutFormHeader 
+            onBackClick={() => navigate('/workouts')}
+            onOpenTips={() => setIsProTipsOpen(true)}
+          />
           
-          <div className="order-first lg:order-last">
-            <div className="sticky top-24">
-              <ScrollArea className="max-h-[calc(100vh-120px)] pr-2">
-                <PlanOverviewCard 
-                  createdAt={stats.createdAt}
-                  updatedAt={stats.updatedAt}
-                  totalExercises={stats.totalExercises}
-                  weeklyFrequency={stats.weeklyFrequency}
-                  className={`mb-5 bg-gradient-to-br from-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-50 to-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-100 border-${planData.type === 'strength' ? 'blue' : WORKOUT_PLAN_TYPES.find(t => t.id === planData.type)?.accent?.split('-')[1] || 'blue'}-200 shadow-md`}
-                />
-                
-                {planData.name && (
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col xl:flex-row gap-8">
+              {/* Main Content */}
+              <div className="flex-1">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-muted/30">
+                    <TabsTrigger 
+                      value="details" 
+                      className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                      Plan Details
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="exercises" 
+                      className="text-sm font-medium data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                    >
+                      Exercises
+                    </TabsTrigger>
+                  </TabsList>
+                  
+                  <form id="workout-form" onSubmit={handleSubmit}>
+                    <TabsContent value="details" className="mt-0 space-y-6">
+                      <PlanDetailsForm
+                        name={planData.name}
+                        description={planData.description}
+                        duration={planData.duration}
+                        onChange={handlePlanChange}
+                      />
+                      
+                      <WorkoutTypeSelector 
+                        selectedType={planData.type} 
+                        onTypeChange={handleTypeChange}
+                      />
+                    </TabsContent>
+                    
+                    <TabsContent value="exercises" className="mt-0">
+                      <DayBasedExerciseList
+                        exercises={exercises}
+                        onAddExercise={addExercise}
+                        onRemoveExercise={removeExercise}
+                        onExerciseChange={handleExerciseChange}
+                        onOpenLibrary={openLibrary}
+                        onAddFromLibrary={handleAddFromLibrary}
+                      />
+                    </TabsContent>
+                  </form>
+                </Tabs>
+              </div>
+              
+              {/* Compact Summary Sidebar */}
+              {planData.name && (
+                <div className="xl:w-80 xl:sticky xl:top-24 xl:h-fit">
                   <PlanSummaryCard
                     name={planData.name}
                     description={planData.description}
@@ -231,8 +224,8 @@ const WorkoutNew = () => {
                     exerciseCount={stats.totalExercises}
                     weeklyFrequency={stats.weeklyFrequency}
                   />
-                )}
-              </ScrollArea>
+                </div>
+              )}
             </div>
           </div>
         </div>
