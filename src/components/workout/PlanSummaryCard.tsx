@@ -25,60 +25,47 @@ const PlanSummaryCard = ({
   const selectedPlanType = WORKOUT_PLAN_TYPES.find(t => t.id === type) || WORKOUT_PLAN_TYPES[0];
   
   return (
-    <Card className={`border-${selectedPlanType.accent?.split('-')[1]}-300 shadow-md mb-5 hover:shadow-xl transition-all duration-300 overflow-hidden`}>
-      <div className={`absolute inset-0 bg-gradient-to-br from-white via-${selectedPlanType.accent?.split('-')[1]}-50 to-${selectedPlanType.accent?.split('-')[1]}-100 opacity-50`}></div>
-      <CardHeader className="pb-2 relative">
-        <CardTitle className="text-lg flex items-center">
-          <span className={selectedPlanType.accent}>Plan Summary</span>
-          <Sparkles className={`h-4 w-4 ${selectedPlanType.accent} ml-2`} />
+    <Card className="card-enhanced">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          Plan Preview
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-4 relative">
-        <div className="space-y-3">
-          <div>
-            <h3 className="font-medium text-xl text-gray-800 flex items-center">
-              {name || "Untitled Plan"}
-              {name && <Award className={`h-4 w-4 ${selectedPlanType.accent} ml-2`} />}
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">{description || "No description provided"}</p>
+      <CardContent className="space-y-4">
+        <div>
+          <h3 className="font-semibold text-lg text-foreground mb-1">
+            {name || "Untitled Plan"}
+          </h3>
+          {description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {description}
+            </p>
+          )}
+        </div>
+        
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary" className="text-xs">
+            {selectedPlanType.name || "Custom"}
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            {duration} weeks
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            {exerciseCount} exercises
+          </Badge>
+        </div>
+        
+        <div className="pt-3 border-t">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Frequency</span>
+            <span className="font-medium">{weeklyFrequency}x / week</span>
           </div>
-          
-          <div className="flex flex-wrap gap-2">
-            <Badge 
-              variant="secondary" 
-              className={`
-                ${selectedPlanType.color}
-                border-opacity-50 hover:bg-opacity-20 transition-colors
-              `}
-            >
-              {selectedPlanType.name || "Custom"}
+          <div className="flex items-center justify-between text-sm mt-2">
+            <span className="text-muted-foreground">Status</span>
+            <Badge variant={exerciseCount > 0 ? "default" : "secondary"} className="text-xs">
+              {exerciseCount > 0 ? "In Progress" : "Empty"}
             </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1">
-              <CalendarDays className="h-3 w-3" />
-              {duration} weeks
-            </Badge>
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {exerciseCount} exercises
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
-            <div className="text-center p-2 rounded-lg bg-gray-50/80 hover:bg-gray-50 transition-colors backdrop-blur-sm">
-              <p className="text-xs text-gray-500">FREQUENCY</p>
-              <p className="text-lg font-semibold">{weeklyFrequency}x / week</p>
-            </div>
-            <div className="text-center p-2 rounded-lg bg-gray-50/80 hover:bg-gray-50 transition-colors backdrop-blur-sm">
-              <p className="text-xs text-gray-500">INTENSITY</p>
-              <div className="flex justify-center gap-1 mt-1">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Zap 
-                    key={i} 
-                    className={`h-4 w-4 transition-all ${i <= Math.min(Math.ceil(exerciseCount / 3), 5) ? selectedPlanType.accent + ' animate-pulse' : 'text-gray-300'}`} 
-                  />
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </CardContent>
