@@ -8,12 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageTransition from '@/components/PageTransition';
 import ExerciseLibraryModal from '@/components/workout/ExerciseLibraryModal';
 import PlanDetailsForm from '@/components/workout/PlanDetailsForm';
-import DayBasedExerciseList from '@/components/workout/DayBasedExerciseList';
-
 import WorkoutTypeSelector, { WORKOUT_PLAN_TYPES } from '@/components/workout/WorkoutTypeSelector';
 import WorkoutFormHeader from '@/components/workout/WorkoutFormHeader';
 import TrainingTipsDrawer from '@/components/workout/TrainingTipsDrawer';
 import PlanSummaryCard from '@/components/workout/PlanSummaryCard';
+import DayBasedExerciseList from '@/components/workout/DayBasedExerciseList';
 
 const WorkoutNew = () => {
   const navigate = useNavigate();
