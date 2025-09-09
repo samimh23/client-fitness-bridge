@@ -159,7 +159,7 @@ const WorkoutNew = () => {
   return (
     <PageTransition>
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 pt-24 pb-16">
+        <div className="container mx-auto px-4 py-8">
           <WorkoutFormHeader 
             onBackClick={() => navigate('/workouts')}
             onOpenTips={() => setIsProTipsOpen(true)}

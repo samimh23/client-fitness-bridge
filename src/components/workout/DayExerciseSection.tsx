@@ -111,7 +111,7 @@ const DayExerciseSection = ({
             <p className="text-base">Start building your workout for Day {day}</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
             {exercises.map((exercise, exerciseIndex) => {
               // Find the global index in allExercises array
               const globalIndex = allExercises.findIndex(ex => 
@@ -120,8 +120,12 @@ const DayExerciseSection = ({
               
               return (
                 <React.Fragment key={globalIndex}>
-                  {exerciseIndex > 0 && <Separator className="my-8 bg-gradient-to-r from-transparent via-border to-transparent" />}
-                  <div className={`rounded-2xl p-4 border-2 transition-all duration-300 hover:shadow-lg ${getExerciseColor(exerciseIndex)}`}>
+                  <div className={`rounded-xl p-4 border transition-all duration-200 hover:shadow-md ${getExerciseColor(exerciseIndex)}`}>
+                    <div className="mb-2">
+                      <span className="text-xs font-medium text-muted-foreground bg-background/50 px-2 py-1 rounded-full">
+                        Exercise {exerciseIndex + 1}
+                      </span>
+                    </div>
                     <ExerciseForm
                       exercise={exercise}
                       index={globalIndex}
