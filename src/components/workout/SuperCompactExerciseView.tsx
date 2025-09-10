@@ -85,7 +85,7 @@ const SuperCompactExerciseView = ({
       [index]: {
         sets: (exercises[index].sets || '').toString(),
         reps: (exercises[index].reps || '').toString(),
-        rest: (exercises[index].restTime || '').toString()
+        rest: (exercises[index].restPeriod || '').toString()
       }
     });
   };
@@ -95,7 +95,7 @@ const SuperCompactExerciseView = ({
     if (values) {
       onChange(index, 'sets', parseInt(values.sets) || 0);
       onChange(index, 'reps', parseInt(values.reps) || 0);
-      onChange(index, 'restTime', parseInt(values.rest) || 0);
+      onChange(index, 'restPeriod', parseInt(values.rest) || 0);
     }
     setEditingIndex(null);
   };
@@ -275,7 +275,7 @@ const SuperCompactExerciseView = ({
                       <div className="text-muted-foreground">reps</div>
                     </div>
                     <div className="text-center">
-                      <div className="font-semibold text-orange-600">{exercise.restTime ? `${exercise.restTime}s` : '-'}</div>
+                      <div className="font-semibold text-orange-600">{exercise.restPeriod ? `${exercise.restPeriod}s` : '-'}</div>
                       <div className="text-muted-foreground">rest</div>
                     </div>
                   </div>
