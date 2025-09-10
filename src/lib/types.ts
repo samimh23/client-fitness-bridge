@@ -76,25 +76,30 @@ export interface NutritionAdherenceEntry {
 
 export interface WorkoutPlan {
   id: string;
-  name: string;
+  planName: string;
   description: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'COMPLETED';
+  weekNumber: number;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  workoutDays: WorkoutDay[];
+}
+
+export interface WorkoutDay {
+  dayNumber: number;
+  title: string;
   exercises: Exercise[];
-  duration: number; // in weeks
-  createdAt: Date;
-  updatedAt: Date;
-  assignedToClientIds: string[];
 }
 
 export interface Exercise {
-  id: string;
   name: string;
   sets: number;
   reps: number;
+  order: number;
+  restPeriod?: number;
+  videoUrl?: string;
   weight?: string;
-  duration?: number; // in minutes
-  restTime?: number; // in seconds
+  duration?: number;
   instructions?: string;
-  day: number; // day of the workout (1-7)
 }
 
 export interface NutritionPlan {

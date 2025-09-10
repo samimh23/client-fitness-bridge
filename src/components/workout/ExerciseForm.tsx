@@ -35,7 +35,7 @@ const ExerciseForm = ({ exercise, index, onRemove, onChange, onOpenLibrary }: Ex
   };
 
   const handleQuickRest = (restTime: number) => {
-    onChange(index, 'restTime', restTime);
+    onChange(index, 'restPeriod', restTime);
   };
 
   return (
@@ -210,8 +210,8 @@ const ExerciseForm = ({ exercise, index, onRemove, onChange, onOpenLibrary }: Ex
                   type="number"
                   min={0}
                   max={600}
-                  value={exercise.restTime || ''}
-                  onChange={(e) => onChange(index, 'restTime', parseInt(e.target.value) || 0)}
+                  value={exercise.restPeriod || ''}
+                  onChange={(e) => onChange(index, 'restPeriod', parseInt(e.target.value) || 0)}
                   className="h-10 pr-12"
                   placeholder="60"
                 />
@@ -334,7 +334,7 @@ const ExerciseForm = ({ exercise, index, onRemove, onChange, onOpenLibrary }: Ex
                 </div>
                 <div className="text-sm text-green-700">
                   {exercise.sets} sets × {exercise.reps} reps
-                  {exercise.restTime && ` • ${exercise.restTime}s rest`}
+                  {exercise.restPeriod && ` • ${exercise.restPeriod}s rest`}
                   {exercise.weight && ` • ${exercise.weight}`}
                 </div>
               </div>

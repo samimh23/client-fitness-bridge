@@ -29,9 +29,11 @@ interface ModernExerciseManagerProps {
   exercises: Partial<Exercise>[];
   onAddExercise: (day: number) => void;
   onRemoveExercise: (index: number) => void;
-  onExerciseChange: (index: number, field: keyof Exercise, value: any) => void;
+  onExerciseChange: (index: number, field: keyof Exercise, value: string | number) => void;
   onOpenLibrary: (index: number) => void;
   onAddFromLibrary: (day: number) => void;
+  initialActiveDay?: number;
+  onActiveDayChange?: (day: number) => void;
 }
 
 const ModernExerciseManager = ({ 
@@ -40,13 +42,15 @@ const ModernExerciseManager = ({
   onRemoveExercise, 
   onExerciseChange, 
   onOpenLibrary,
-  onAddFromLibrary
+  onAddFromLibrary,
+  initialActiveDay,
+  onActiveDayChange
 }: ModernExerciseManagerProps) => {
-  const [activeDay, setActiveDay] = useState(1);
+  const [activeDay, setActiveDay] = useState(initialActiveDay || 1);
 
   // Group exercises by day
   const exercisesByDay = exercises.reduce((acc, exercise) => {
-    const day = exercise.day || 1;
+    const day = (exercise as Partial<Exercise> & { day?: number }).day || 1;
     if (!acc[day]) acc[day] = [];
     acc[day].push(exercise);
     return acc;
@@ -60,15 +64,20 @@ const ModernExerciseManager = ({
     const newDay = maxDay + 1;
     onAddExercise(newDay);
     setActiveDay(newDay);
+    onActiveDayChange?.(newDay);
   };
 
   // Navigate to previous/next day
   const navigateDay = (direction: 'prev' | 'next') => {
     const currentIndex = activeDays.indexOf(activeDay);
     if (direction === 'prev' && currentIndex > 0) {
-      setActiveDay(activeDays[currentIndex - 1]);
+      const newDay = activeDays[currentIndex - 1];
+      setActiveDay(newDay);
+      onActiveDayChange?.(newDay);
     } else if (direction === 'next' && currentIndex < activeDays.length - 1) {
-      setActiveDay(activeDays[currentIndex + 1]);
+      const newDay = activeDays[currentIndex + 1];
+      setActiveDay(newDay);
+      onActiveDayChange?.(newDay);
     }
   };
 
@@ -115,7 +124,10 @@ const ModernExerciseManager = ({
                     key={day}
                     variant={activeDay === day ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setActiveDay(day)}
+                    onClick={() => {
+                      setActiveDay(day);
+                      onActiveDayChange?.(day);
+                    }}
                     className="flex items-center gap-2 min-w-fit h-8 flex-shrink-0"
                   >
                     <span>Day {day}</span>
@@ -158,7 +170,11 @@ const ModernExerciseManager = ({
               <span className="text-sm font-medium text-muted-foreground">Day</span>
               <select
                 value={activeDay}
-                onChange={(e) => setActiveDay(Number(e.target.value))}
+                onChange={(e) => {
+                  const newDay = Number(e.target.value);
+                  setActiveDay(newDay);
+                  onActiveDayChange?.(newDay);
+                }}
                 className="h-8 px-3 py-1 border border-border rounded-md bg-background text-sm font-medium min-w-fit"
               >
                 {activeDays.map(day => {
